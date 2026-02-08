@@ -286,13 +286,13 @@ const styles = StyleSheet.create({
   subtitleText: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
   filterRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 10 },
   filterChip: {
-    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+    paddingHorizontal: 20, paddingVertical: 12, borderRadius: 20,
     backgroundColor: '#FFF', borderWidth: 1, borderColor: Colors.border,
   },
   filterChipActive: {
     backgroundColor: Colors.primary, borderColor: Colors.primary,
   },
-  filterText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  filterText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   filterTextActive: { color: '#FFF' },
   content: { padding: 20, paddingTop: 6, paddingBottom: 40 },
   monthLabel: {
