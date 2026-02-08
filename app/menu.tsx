@@ -31,7 +31,6 @@ export default function MenuScreen() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [showTableModal, setShowTableModal] = useState(tableNumber === null);
   const [showScanner, setShowScanner] = useState(false);
-  const [manualInput, setManualInput] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
@@ -57,14 +56,8 @@ export default function MenuScreen() {
     setShowTableModal(false);
   }
 
-  function handleManualSubmit() {
-    const num = parseInt(manualInput, 10);
-    if (num >= 1 && num <= 99) handleSelectTable(num);
-  }
-
   function handleChangeTable() {
     setShowTableModal(true);
-    setManualInput('');
     setShowScanner(false);
   }
 
@@ -181,125 +174,101 @@ export default function MenuScreen() {
       <Modal
         visible={showTableModal}
         animationType="slide"
-        transparent
         onRequestClose={() => { if (tableNumber) setShowTableModal(false); }}
       >
-        <View style={styles.modalOverlay}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalKeyboard}>
-            <Animated.View entering={FadeInUp.duration(400)} style={[styles.modalContent, { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 0) + 20 }]}>
-              {showScanner ? (
-                <View style={styles.scannerContainer}>
-                  <View style={styles.scannerHeader}>
-                    <Pressable onPress={() => setShowScanner(false)} style={styles.scannerBackBtn}>
-                      <Ionicons name="chevron-back" size={24} color={Colors.text} />
-                    </Pressable>
-                    <Text style={styles.scannerTitle}>Scan QR Code</Text>
-                    <View style={{ width: 40 }} />
+        <View style={[styles.modalOverlay, { paddingTop: insets.top + webTopInset }]}>
+          {showScanner ? (
+            <View style={styles.scannerContainer}>
+              <View style={styles.scannerHeader}>
+                <Pressable onPress={() => setShowScanner(false)} style={styles.scannerBackBtn}>
+                  <Ionicons name="chevron-back" size={24} color={Colors.text} />
+                </Pressable>
+                <Text style={styles.scannerTitle}>Scan QR Code</Text>
+                <View style={{ width: 40 }} />
+              </View>
+              {Platform.OS === 'web' ? (
+                <View style={styles.scannerFallback}>
+                  <View style={styles.scannerFallbackIcon}>
+                    <Ionicons name="camera-outline" size={48} color={Colors.textSecondary} />
                   </View>
-                  {Platform.OS === 'web' ? (
-                    <View style={styles.scannerFallback}>
-                      <View style={styles.scannerFallbackIcon}>
-                        <Ionicons name="camera-outline" size={48} color={Colors.textSecondary} />
+                  <Text style={styles.scannerFallbackTitle}>Camera not available</Text>
+                  <Text style={styles.scannerFallbackText}>Select your table from the grid</Text>
+                  <Pressable onPress={() => setShowScanner(false)}>
+                    <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={styles.scannerFallbackBtn}>
+                      <Text style={styles.scannerFallbackBtnText}>Back to Tables</Text>
+                    </LinearGradient>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={styles.cameraBox}>
+                  {permission?.granted ? (
+                    <CameraView
+                      style={styles.camera}
+                      barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                      onBarcodeScanned={handleBarCodeScanned}
+                    >
+                      <View style={styles.scanOverlay}>
+                        <View style={styles.scanFrame}>
+                          <View style={[styles.scanCorner, styles.scanTL]} />
+                          <View style={[styles.scanCorner, styles.scanTR]} />
+                          <View style={[styles.scanCorner, styles.scanBL]} />
+                          <View style={[styles.scanCorner, styles.scanBR]} />
+                        </View>
+                        <Text style={styles.scanHint}>Point at the table QR code</Text>
                       </View>
-                      <Text style={styles.scannerFallbackTitle}>Camera not available</Text>
-                      <Text style={styles.scannerFallbackText}>Please enter your table number manually</Text>
-                      <Pressable onPress={() => setShowScanner(false)}>
+                    </CameraView>
+                  ) : (
+                    <View style={styles.scannerFallback}>
+                      <Ionicons name="camera-outline" size={48} color={Colors.textSecondary} />
+                      <Text style={styles.scannerFallbackTitle}>Camera access needed</Text>
+                      <Pressable onPress={requestPermission}>
                         <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={styles.scannerFallbackBtn}>
-                          <Text style={styles.scannerFallbackBtnText}>Enter Manually</Text>
+                          <Text style={styles.scannerFallbackBtnText}>Allow Camera</Text>
                         </LinearGradient>
                       </Pressable>
-                    </View>
-                  ) : (
-                    <View style={styles.cameraBox}>
-                      {permission?.granted ? (
-                        <CameraView
-                          style={styles.camera}
-                          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-                          onBarcodeScanned={handleBarCodeScanned}
-                        >
-                          <View style={styles.scanOverlay}>
-                            <View style={styles.scanFrame}>
-                              <View style={[styles.scanCorner, styles.scanTL]} />
-                              <View style={[styles.scanCorner, styles.scanTR]} />
-                              <View style={[styles.scanCorner, styles.scanBL]} />
-                              <View style={[styles.scanCorner, styles.scanBR]} />
-                            </View>
-                            <Text style={styles.scanHint}>Point at the table QR code</Text>
-                          </View>
-                        </CameraView>
-                      ) : (
-                        <View style={styles.scannerFallback}>
-                          <Ionicons name="camera-outline" size={48} color={Colors.textSecondary} />
-                          <Text style={styles.scannerFallbackTitle}>Camera access needed</Text>
-                          <Pressable onPress={requestPermission}>
-                            <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={styles.scannerFallbackBtn}>
-                              <Text style={styles.scannerFallbackBtnText}>Allow Camera</Text>
-                            </LinearGradient>
-                          </Pressable>
-                        </View>
-                      )}
                     </View>
                   )}
                 </View>
-              ) : (
-                <>
-                  <View style={styles.modalHandle} />
-                  <View style={styles.modalHeader}>
-                    <View style={styles.modalIconWrap}>
-                      <Ionicons name="tablet-landscape-outline" size={28} color={Colors.primary} />
-                    </View>
-                    <Text style={styles.modalTitle}>Select Your Table</Text>
-                    <Text style={styles.modalSubtitle}>Choose your table number or scan the QR code on your table</Text>
-                  </View>
-                  <View style={styles.inputRow}>
-                    <View style={styles.inputWrap}>
-                      <Ionicons name="keypad-outline" size={18} color={Colors.textSecondary} style={styles.inputIcon} />
-                      <TextInput
-                        style={styles.tableInput}
-                        placeholder="Enter table number"
-                        placeholderTextColor={Colors.textSecondary}
-                        keyboardType="number-pad"
-                        value={manualInput}
-                        onChangeText={setManualInput}
-                        maxLength={2}
-                        onSubmitEditing={handleManualSubmit}
-                        returnKeyType="done"
-                      />
-                      <Pressable
-                        onPress={handleOpenScanner}
-                        style={({ pressed }) => [styles.scanIconBtn, pressed && { opacity: 0.7 }]}
-                      >
-                        <Ionicons name="qr-code-outline" size={22} color="#FFF" />
-                      </Pressable>
-                    </View>
-                    {manualInput.length > 0 && (
-                      <Pressable onPress={handleManualSubmit} style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
-                        <LinearGradient colors={['#1A1A1A', '#2D2D2D']} style={styles.goBtn}>
-                          <Ionicons name="arrow-forward" size={20} color="#FFF" />
-                        </LinearGradient>
-                      </Pressable>
-                    )}
-                  </View>
-                  <View style={styles.dividerRow}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>or select below</Text>
-                    <View style={styles.dividerLine} />
-                  </View>
-                  <ScrollView showsVerticalScrollIndicator={false} style={styles.tableGridScroll} contentContainerStyle={styles.tableGrid}>
-                    {TABLE_NUMBERS.map(num => (
-                      <Pressable
-                        key={num}
-                        onPress={() => handleSelectTable(num)}
-                        style={({ pressed }) => [styles.tableCell, pressed && { transform: [{ scale: 0.92 }] }]}
-                      >
-                        <Text style={styles.tableCellNum}>{num}</Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </>
               )}
-            </Animated.View>
-          </KeyboardAvoidingView>
+            </View>
+          ) : (
+            <>
+              <View style={styles.modalTopRow}>
+                {tableNumber ? (
+                  <Pressable onPress={() => setShowTableModal(false)} style={styles.modalCloseBtn}>
+                    <Ionicons name="close" size={24} color={Colors.text} />
+                  </Pressable>
+                ) : (
+                  <View style={{ width: 40 }} />
+                )}
+                <View style={{ flex: 1 }} />
+                <Pressable
+                  onPress={handleOpenScanner}
+                  style={({ pressed }) => [styles.scanIconBtn, pressed && { opacity: 0.7 }]}
+                >
+                  <Ionicons name="qr-code-outline" size={22} color="#FFF" />
+                </Pressable>
+              </View>
+              <View style={styles.modalHeader}>
+                <View style={styles.modalIconWrap}>
+                  <Ionicons name="tablet-landscape-outline" size={28} color={Colors.primary} />
+                </View>
+                <Text style={styles.modalTitle}>Select Your Table</Text>
+                <Text style={styles.modalSubtitle}>Tap your table number</Text>
+              </View>
+              <View style={styles.tableGrid}>
+                {TABLE_NUMBERS.map(num => (
+                  <Pressable
+                    key={num}
+                    onPress={() => handleSelectTable(num)}
+                    style={({ pressed }) => [styles.tableCell, pressed && { transform: [{ scale: 0.92 }], backgroundColor: Colors.primary + '10' }]}
+                  >
+                    <Text style={styles.tableCellNum}>{num}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          )}
         </View>
       </Modal>
     </View>
@@ -656,20 +625,17 @@ const styles = StyleSheet.create({
   cartBarTotal: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: '#FFF' },
 
   modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
+    flex: 1, backgroundColor: Colors.background, paddingHorizontal: 24,
   },
-  modalKeyboard: { justifyContent: 'flex-end' },
-  modalContent: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    paddingHorizontal: 24, paddingTop: 12,
-    maxHeight: '85%',
+  modalTopRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginBottom: 8, paddingTop: 8,
   },
-  modalHandle: {
-    width: 40, height: 4, borderRadius: 2, backgroundColor: Colors.border,
-    alignSelf: 'center', marginBottom: 20,
+  modalCloseBtn: {
+    width: 40, height: 40, borderRadius: 14, backgroundColor: Colors.surface,
+    justifyContent: 'center', alignItems: 'center',
   },
-  modalHeader: { alignItems: 'center', marginBottom: 24 },
+  modalHeader: { alignItems: 'center', marginBottom: 20 },
   modalIconWrap: {
     width: 60, height: 60, borderRadius: 20, backgroundColor: Colors.primary + '10',
     justifyContent: 'center', alignItems: 'center', marginBottom: 14,
@@ -677,44 +643,24 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 6 },
   modalSubtitle: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, textAlign: 'center', lineHeight: 20 },
 
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
-  inputWrap: {
-    flex: 1, flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#FFF', borderRadius: 16, paddingLeft: 14,
-    borderWidth: 1.5, borderColor: Colors.border, height: 54,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 1,
-  },
-  inputIcon: { marginRight: 10 },
-  tableInput: {
-    flex: 1, fontSize: 16, fontFamily: 'Poppins_500Medium', color: Colors.text,
-    height: 54, paddingRight: 8,
-  },
   scanIconBtn: {
     width: 42, height: 42, borderRadius: 14, backgroundColor: Colors.primary,
-    justifyContent: 'center', alignItems: 'center', marginRight: 5,
-  },
-  goBtn: {
-    width: 54, height: 54, borderRadius: 16, justifyContent: 'center', alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center',
   },
 
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18, gap: 12 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
-  dividerText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-
-  tableGridScroll: { maxHeight: 260 },
   tableGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: 10,
-    justifyContent: 'center', paddingBottom: 10,
+    flex: 1, flexDirection: 'row', flexWrap: 'wrap',
+    gap: 10, justifyContent: 'center', alignContent: 'center',
   },
   tableCell: {
-    width: (width - 48 - 40) / 5, height: (width - 48 - 40) / 5,
-    borderRadius: 16, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 1,
-    borderWidth: 1, borderColor: Colors.border + '80',
+    width: (width - 48 - 30) / 4, aspectRatio: 1,
+    borderRadius: 18, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    borderWidth: 1.5, borderColor: Colors.border + '80',
   },
-  tableCellNum: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  tableCellNum: { fontSize: 20, fontFamily: 'Poppins_700Bold', color: Colors.text },
 
-  scannerContainer: { minHeight: 400 },
+  scannerContainer: { flex: 1 },
   scannerHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     marginBottom: 16, paddingTop: 8,

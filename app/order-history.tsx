@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -27,6 +27,18 @@ export default function OrderHistoryScreen() {
   function formatTime(dateStr: string) {
     const d = new Date(dateStr);
     return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  async function handleForwardReceipt(order: typeof orders[0]) {
+    const itemsText = order.items
+      .map((item) => `- ${item.quantity}x ${item.name} - £${item.price.toFixed(2)}`)
+      .join('\n');
+
+    const receiptText = `Dine & Earn Receipt\nDate: ${formatDate(order.date)}\nTable: ${order.tableNumber}\n\nItems:\n${itemsText}\n\nTotal: £${order.total.toFixed(2)}`;
+
+    try {
+      await Share.share({ message: receiptText });
+    } catch (_) {}
   }
 
   return (
@@ -92,6 +104,23 @@ export default function OrderHistoryScreen() {
                   <Text style={styles.totalLabel}>Total</Text>
                   <Text style={styles.totalValue}>£{order.total.toFixed(2)}</Text>
                 </View>
+
+                <View style={styles.actionRow}>
+                  <Pressable
+                    style={styles.primaryButton}
+                    onPress={() => router.push('/menu')}
+                  >
+                    <Ionicons name="refresh" size={15} color="#FFF" />
+                    <Text style={styles.primaryButtonText}>Order Again</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.secondaryButton}
+                    onPress={() => handleForwardReceipt(order)}
+                  >
+                    <Ionicons name="mail-outline" size={15} color={Colors.primary} />
+                    <Text style={styles.secondaryButtonText}>Forward Receipt</Text>
+                  </Pressable>
+                </View>
               </Animated.View>
             );
           })
@@ -152,4 +181,42 @@ const styles = StyleSheet.create({
   },
   totalLabel: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary },
   totalValue: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.primary },
+
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+  },
+  primaryButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: Colors.primary,
+    paddingVertical: 11,
+    borderRadius: 12,
+  },
+  primaryButtonText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#FFF',
+  },
+  secondaryButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: 'transparent',
+    paddingVertical: 11,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+  },
+  secondaryButtonText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.primary,
+  },
 });
