@@ -284,15 +284,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, marginBottom: 10,
   },
   subtitleText: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-  filterRow: { paddingHorizontal: 20, gap: 10, paddingBottom: 14 },
+  filterRow: { paddingHorizontal: 20, gap: 10, paddingBottom: 16 },
   filterChip: {
-    paddingHorizontal: 24, paddingVertical: 14, borderRadius: 24,
+    paddingHorizontal: 20, borderRadius: 24,
     backgroundColor: '#FFF', borderWidth: 1.5, borderColor: Colors.border,
+    height: 44, justifyContent: 'center' as const, alignItems: 'center' as const,
   },
   filterChipActive: {
     backgroundColor: Colors.primary, borderColor: Colors.primary,
   },
-  filterText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  filterText: { fontSize: 15, lineHeight: 20, fontFamily: 'Poppins_600SemiBold', color: Colors.text, includeFontPadding: false },
   filterTextActive: { color: '#FFF' },
   content: { padding: 20, paddingTop: 6, paddingBottom: 40 },
   monthLabel: {
