@@ -35,6 +35,7 @@ app/
   cart.tsx            - Order review and checkout (modal)
   events.tsx          - Event listing
   event-detail.tsx    - Event details and booking
+  gift-vouchers.tsx   - Gift voucher purchase (£25-£150) with wallet/email/SMS delivery
   local-events.tsx    - Wilmslow local events & cinema listings with maps and book-a-table
   order-history.tsx   - Past orders with PDF receipt generation
   saved-items.tsx     - Bookmarked menu items with remove/browse
@@ -61,6 +62,7 @@ constants/
 - None recorded yet
 
 ## Recent Changes
+- Feb 2026: Added Gift Vouchers page with denomination cards (£25-£150), delivery options (wallet/email/SMS), recipient details, terms acceptance, and default payment method
 - Feb 2026: Added Local Events page with full year of Wilmslow events, Rex Cinema listings, Google Maps modal, and "Book a table after" links
 - Feb 2026: Updated book-table with full monthly calendar (month navigation, all days grid)
 - Feb 2026: Order history now generates PDF receipts via expo-print/expo-sharing
