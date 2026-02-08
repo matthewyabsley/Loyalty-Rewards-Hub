@@ -113,15 +113,21 @@ export default function ProfileScreen() {
           </Animated.View>
         ))}
 
-        <Animated.View entering={FadeInDown.delay(400).duration(500)}>
+        <View>
           <Pressable
             style={({ pressed }) => [styles.signOutBtn, pressed && { opacity: 0.8 }]}
-            onPress={handleSignOut}
+            onPress={() => {
+              signOut().then(() => {
+                router.replace('/');
+              }).catch(() => {
+                router.replace('/');
+              });
+            }}
           >
             <Ionicons name="log-out-outline" size={20} color={Colors.error} />
             <Text style={styles.signOutText}>Sign Out</Text>
           </Pressable>
-        </Animated.View>
+        </View>
       </ScrollView>
     </View>
   );
