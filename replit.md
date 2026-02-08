@@ -30,12 +30,13 @@ app/
     rewards.tsx       - Swipeable QR code reward cards
     points.tsx        - Points balance, tier progress, transaction history
     profile.tsx       - User profile & settings (with notification badge)
-  book-table.tsx      - Table booking with date/time/guest selection
+  book-table.tsx      - Table booking with monthly calendar date picker
   menu.tsx            - Food menu with categories and cart
   cart.tsx            - Order review and checkout (modal)
   events.tsx          - Event listing
   event-detail.tsx    - Event details and booking
-  order-history.tsx   - Past orders with items, options, and totals
+  local-events.tsx    - Wilmslow local events & cinema listings with maps and book-a-table
+  order-history.tsx   - Past orders with PDF receipt generation
   saved-items.tsx     - Bookmarked menu items with remove/browse
   payment-methods.tsx - Card management (add/remove/set default)
   notifications.tsx   - Notifications with read/unread and mark all read
@@ -60,6 +61,10 @@ constants/
 - None recorded yet
 
 ## Recent Changes
+- Feb 2026: Added Local Events page with full year of Wilmslow events, Rex Cinema listings, Google Maps modal, and "Book a table after" links
+- Feb 2026: Updated book-table with full monthly calendar (month navigation, all days grid)
+- Feb 2026: Order history now generates PDF receipts via expo-print/expo-sharing
+- Feb 2026: Improved menu item modal to 90% width with reduced font sizes
 - Feb 2026: Added 6 functional profile sub-pages (Order History, Saved Items, Payment Methods, Notifications, Help & Support, Terms & Privacy)
 - Feb 2026: Extended data context with orders, saved items, payment methods, notifications management
 - Feb 2026: Initial build of complete loyalty app
