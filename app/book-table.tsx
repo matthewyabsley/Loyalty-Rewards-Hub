@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, ScrollView, Pressable, StyleSheet, Platform, Alert,
 } from 'react-native';
@@ -24,12 +24,53 @@ export default function BookTableScreen() {
   const { updatePoints } = useAuth();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [selectedGuests, setSelectedGuests] = useState(2);
   const [isBooking, setIsBooking] = useState(false);
 
-  const dates = getNext14Days();
+  const monthName = new Date(currentYear, currentMonth).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  const calendarDays = useMemo(() => {
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const startDay = firstDay.getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const cells: { key: string; num: number; value: string; past: boolean }[] = [];
+    for (let i = 0; i < startDay; i++) {
+      cells.push({ key: `blank-${i}`, num: 0, value: '', past: true });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      cells.push({ key: dateStr, num: d, value: dateStr, past: dateStr < todayStr });
+    }
+    return cells;
+  }, [currentMonth, currentYear]);
+
+  const canGoBack = currentMonth !== today.getMonth() || currentYear !== today.getFullYear();
+
+  function goNextMonth() {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(y => y + 1);
+    } else {
+      setCurrentMonth(m => m + 1);
+    }
+  }
+
+  function goPrevMonth() {
+    if (!canGoBack) return;
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(y => y - 1);
+    } else {
+      setCurrentMonth(m => m - 1);
+    }
+  }
 
   async function handleBook() {
     if (!selectedDate || !selectedTime) {
@@ -60,29 +101,47 @@ export default function BookTableScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <Animated.View entering={FadeInDown.delay(80).duration(500)}>
-          <Text style={styles.label}>Date</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateRow}>
-            {dates.map(d => {
-              const active = selectedDate === d.value;
+          <View style={styles.monthHeader}>
+            <Pressable onPress={goPrevMonth} style={styles.monthArrow} hitSlop={12}>
+              <Ionicons name="chevron-back" size={22} color={canGoBack ? Colors.text : Colors.border} />
+            </Pressable>
+            <Text style={styles.monthTitle}>{monthName}</Text>
+            <Pressable onPress={goNextMonth} style={styles.monthArrow} hitSlop={12}>
+              <Ionicons name="chevron-forward" size={22} color={Colors.text} />
+            </Pressable>
+          </View>
+          <View style={styles.weekdayRow}>
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(wd => (
+              <Text key={wd} style={styles.weekdayText}>{wd}</Text>
+            ))}
+          </View>
+          <View style={styles.calendarGrid}>
+            {calendarDays.map(cell => {
+              if (cell.num === 0) {
+                return <View key={cell.key} style={styles.calendarCell} />;
+              }
+              const active = selectedDate === cell.value;
+              const isToday = cell.value === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
               return (
-                <Pressable key={d.value} onPress={() => setSelectedDate(d.value)}>
+                <Pressable
+                  key={cell.key}
+                  disabled={cell.past}
+                  onPress={() => setSelectedDate(cell.value)}
+                  style={styles.calendarCell}
+                >
                   {active ? (
-                    <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={styles.dateCard}>
-                      <Text style={[styles.dateDayName, { color: 'rgba(255,255,255,0.7)' }]}>{d.day}</Text>
-                      <Text style={[styles.dateDayNum, { color: '#FFF' }]}>{d.num}</Text>
-                      <Text style={[styles.dateMonth, { color: 'rgba(255,255,255,0.7)' }]}>{d.month}</Text>
+                    <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={styles.calendarDay}>
+                      <Text style={[styles.calendarDayText, { color: '#FFF' }]}>{cell.num}</Text>
                     </LinearGradient>
                   ) : (
-                    <View style={styles.dateCard}>
-                      <Text style={styles.dateDayName}>{d.day}</Text>
-                      <Text style={styles.dateDayNum}>{d.num}</Text>
-                      <Text style={styles.dateMonth}>{d.month}</Text>
+                    <View style={[styles.calendarDay, isToday && styles.calendarDayToday]}>
+                      <Text style={[styles.calendarDayText, cell.past && { color: Colors.border }, isToday && { color: Colors.primary }]}>{cell.num}</Text>
                     </View>
                   )}
                 </Pressable>
               );
             })}
-          </ScrollView>
+          </View>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(160).duration(500)}>
@@ -173,21 +232,6 @@ function SummaryRow({ icon, value }: { icon: string; value: string }) {
   );
 }
 
-function getNext14Days() {
-  const days = [];
-  for (let i = 0; i < 14; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    days.push({
-      value: date.toISOString().split('T')[0],
-      day: date.toLocaleDateString('en-GB', { weekday: 'short' }),
-      num: date.getDate().toString(),
-      month: date.toLocaleDateString('en-GB', { month: 'short' }),
-    });
-  }
-  return days;
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   topBar: {
@@ -198,14 +242,32 @@ const styles = StyleSheet.create({
   topTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   scroll: { padding: 20, paddingBottom: 140 },
   label: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 14, marginTop: 8 },
-  dateRow: { marginBottom: 4 },
-  dateCard: {
-    width: 72, height: 92, borderRadius: 18, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center',
-    marginRight: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+  monthHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14,
   },
-  dateDayName: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  dateDayNum: { fontSize: 24, fontFamily: 'Poppins_700Bold', color: Colors.text, marginVertical: 2 },
-  dateMonth: { fontSize: 10, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  monthArrow: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
+  monthTitle: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  weekdayRow: {
+    flexDirection: 'row', marginBottom: 8,
+  },
+  weekdayText: {
+    flex: 1, textAlign: 'center', fontSize: 11, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary,
+  },
+  calendarGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8,
+  },
+  calendarCell: {
+    width: '14.28%' as any, aspectRatio: 1, justifyContent: 'center', alignItems: 'center', padding: 3,
+  },
+  calendarDay: {
+    width: '100%', aspectRatio: 1, borderRadius: 14, backgroundColor: '#FFF',
+    justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 3, elevation: 1,
+  },
+  calendarDayToday: {
+    borderWidth: 1.5, borderColor: Colors.primary,
+  },
+  calendarDayText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   timeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 4 },
   timeChip: {
     paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14, backgroundColor: '#FFF',
