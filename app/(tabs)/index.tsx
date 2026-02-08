@@ -119,6 +119,14 @@ export default function HomeScreen() {
               badge={unclaimedRewards}
             />
             <ActionCard
+              icon="card"
+              iconPack="ionicons"
+              label="Gift Vouchers"
+              subtitle="Send a gift"
+              gradient={['#C97B63', '#A85D48']}
+              onPress={() => router.push('/gift-vouchers')}
+            />
+            <ActionCard
               icon="location"
               iconPack="ionicons"
               label="Local Events"
