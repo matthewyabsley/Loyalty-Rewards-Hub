@@ -29,16 +29,22 @@ app/
     index.tsx         - Home dashboard
     rewards.tsx       - Swipeable QR code reward cards
     points.tsx        - Points balance, tier progress, transaction history
-    profile.tsx       - User profile & settings
+    profile.tsx       - User profile & settings (with notification badge)
   book-table.tsx      - Table booking with date/time/guest selection
   menu.tsx            - Food menu with categories and cart
   cart.tsx            - Order review and checkout (modal)
   events.tsx          - Event listing
   event-detail.tsx    - Event details and booking
+  order-history.tsx   - Past orders with items, options, and totals
+  saved-items.tsx     - Bookmarked menu items with remove/browse
+  payment-methods.tsx - Card management (add/remove/set default)
+  notifications.tsx   - Notifications with read/unread and mark all read
+  help-support.tsx    - FAQ accordion, contact options, message form
+  terms-privacy.tsx   - Terms of Service and Privacy Policy with tab switcher
 
 lib/
   auth-context.tsx    - Authentication state (AsyncStorage)
-  data-context.tsx    - App data (menu, bookings, events, rewards, transactions)
+  data-context.tsx    - App data (menu, bookings, events, rewards, transactions, orders, saved items, payment methods, notifications)
   query-client.ts     - React Query setup
 
 constants/
@@ -54,4 +60,6 @@ constants/
 - None recorded yet
 
 ## Recent Changes
+- Feb 2026: Added 6 functional profile sub-pages (Order History, Saved Items, Payment Methods, Notifications, Help & Support, Terms & Privacy)
+- Feb 2026: Extended data context with orders, saved items, payment methods, notifications management
 - Feb 2026: Initial build of complete loyalty app
