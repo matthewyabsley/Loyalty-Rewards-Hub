@@ -20,21 +20,13 @@ export default function WelcomeScreen() {
   const [email, setEmail] = useState('');
   const [signing, setSigning] = useState(false);
 
-  React.useEffect(() => {
-    if (user && !isLoading) {
-      router.replace('/(tabs)');
-    }
-  }, [user, isLoading]);
-
-  if (isLoading) {
+  if (isLoading || user) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: Colors.primary }]}>
         <ActivityIndicator size="large" color={Colors.accent} />
       </View>
     );
   }
-
-  if (user) return null;
 
   async function handleSocialSignIn(provider: string) {
     setSigning(true);

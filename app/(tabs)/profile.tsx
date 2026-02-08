@@ -109,10 +109,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           activeOpacity={0.6}
           style={styles.signOutBtn}
-          onPress={() => {
-            signOut();
-            router.replace('/');
-          }}
+          onPress={() => signOut()}
         >
           <Ionicons name="log-out-outline" size={20} color={Colors.error} />
           <Text style={styles.signOutText}>Sign Out</Text>
