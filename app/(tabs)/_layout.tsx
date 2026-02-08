@@ -43,18 +43,22 @@ function ClassicTabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: isDark ? '#888' : '#A0A0A0',
+        tabBarInactiveTintColor: isDark ? '#555' : '#BFBBB5',
         tabBarLabelStyle: {
-          fontFamily: 'Poppins_500Medium',
+          fontFamily: 'Poppins_600SemiBold',
           fontSize: 11,
+          letterSpacing: 0.2,
         },
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : isDark ? "#000" : "#fff",
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: isDark ? '#333' : '#E8E4DE',
+          backgroundColor: isIOS ? "transparent" : isDark ? "#000" : "#FAFAF8",
+          borderTopWidth: 0,
           elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.04,
+          shadowRadius: 12,
+          ...(isWeb ? { height: 84, borderTopWidth: 1, borderTopColor: '#EFEEE9' } : {}),
         },
         tabBarBackground: () =>
           isIOS ? (

@@ -7,18 +7,19 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useData } from '@/lib/data-context';
 import Colors from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 const CATEGORIES = ['All', 'Starters', 'Mains', 'Desserts', 'Drinks'];
 
-const CATEGORY_ICONS: Record<string, string> = {
-  'All': 'grid',
-  'Starters': 'leaf',
-  'Mains': 'restaurant',
-  'Desserts': 'ice-cream',
-  'Drinks': 'wine',
+const CAT_ICONS: Record<string, { name: string; color: string }> = {
+  All: { name: 'grid', color: Colors.text },
+  Starters: { name: 'leaf', color: '#4CAF50' },
+  Mains: { name: 'flame', color: '#E8735A' },
+  Desserts: { name: 'ice-cream', color: '#8B5AE8' },
+  Drinks: { name: 'wine', color: '#5A9AE8' },
 };
 
 export default function MenuScreen() {
@@ -27,50 +28,48 @@ export default function MenuScreen() {
   const [activeCategory, setActiveCategory] = useState('All');
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
-  const filteredMenu = activeCategory === 'All'
-    ? menu
-    : menu.filter(item => item.category === activeCategory);
-
+  const filteredMenu = activeCategory === 'All' ? menu : menu.filter(item => item.category === activeCategory);
   const cartItemCount = cart.reduce((sum, c) => sum + c.quantity, 0);
 
-  async function handleAddToCart(item: any) {
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch {}
+  async function handleAdd(item: any) {
+    try { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
     addToCart(item);
   }
 
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + webTopInset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="chevron-back" size={24} color={Colors.text} />
         </Pressable>
-        <Text style={styles.topBarTitle}>Menu</Text>
-        <Pressable
-          style={styles.cartButton}
-          onPress={() => router.push('/cart')}
-        >
-          <Ionicons name="bag-outline" size={24} color={Colors.text} />
+        <Text style={styles.topTitle}>Menu</Text>
+        <Pressable style={styles.cartBtn} onPress={() => router.push('/cart')}>
+          <Ionicons name="bag-outline" size={22} color={Colors.text} />
           {cartItemCount > 0 && (
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cartItemCount}</Text>
+            <View style={styles.cartDot}>
+              <Text style={styles.cartDotText}>{cartItemCount}</Text>
             </View>
           )}
         </Pressable>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryBar} contentContainerStyle={styles.categoryContent}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catBar} contentContainerStyle={styles.catContent}>
         {CATEGORIES.map(cat => {
-          const isActive = activeCategory === cat;
+          const active = activeCategory === cat;
+          const cfg = CAT_ICONS[cat];
           return (
-            <Pressable
-              key={cat}
-              style={[styles.categoryChip, isActive && styles.categoryChipActive]}
-              onPress={() => setActiveCategory(cat)}
-            >
-              <Ionicons name={CATEGORY_ICONS[cat] as any} size={16} color={isActive ? '#FFF' : Colors.textSecondary} />
-              <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>{cat}</Text>
+            <Pressable key={cat} onPress={() => setActiveCategory(cat)}>
+              {active ? (
+                <LinearGradient colors={['#1A1A1A', '#2D2D2D']} style={styles.catChip}>
+                  <Ionicons name={cfg.name as any} size={15} color="#FFF" />
+                  <Text style={[styles.catText, { color: '#FFF' }]}>{cat}</Text>
+                </LinearGradient>
+              ) : (
+                <View style={styles.catChip}>
+                  <Ionicons name={cfg.name as any} size={15} color={Colors.textSecondary} />
+                  <Text style={styles.catText}>{cat}</Text>
+                </View>
+              )}
             </Pressable>
           );
         })}
@@ -78,23 +77,25 @@ export default function MenuScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.menuList}>
         {filteredMenu.map((item, i) => (
-          <MenuItemCard key={item.id} item={item} onAdd={handleAddToCart} delay={i * 50} />
+          <MenuCard key={item.id} item={item} onAdd={handleAdd} delay={i * 40} />
         ))}
       </ScrollView>
 
       {cartItemCount > 0 && (
-        <Animated.View entering={FadeIn.duration(300)} style={[styles.cartBar, { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 0) + 12 }]}>
+        <Animated.View entering={FadeIn.duration(250)} style={[styles.cartBar, { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 0) + 12 }]}>
           <Pressable
-            style={({ pressed }) => [styles.viewCartButton, pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }]}
+            style={({ pressed }) => [pressed && { transform: [{ scale: 0.98 }] }]}
             onPress={() => router.push('/cart')}
           >
-            <View style={styles.cartInfo}>
-              <View style={styles.cartCount}>
-                <Text style={styles.cartCountText}>{cartItemCount}</Text>
+            <LinearGradient colors={['#1A1A1A', '#2D2D2D']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.cartBarInner}>
+              <View style={styles.cartBarLeft}>
+                <View style={styles.cartCount}>
+                  <Text style={styles.cartCountText}>{cartItemCount}</Text>
+                </View>
+                <Text style={styles.cartBarLabel}>View Order</Text>
               </View>
-              <Text style={styles.viewCartText}>View Order</Text>
-            </View>
-            <Text style={styles.cartTotalText}>{'\u00A3'}{cartTotal.toFixed(2)}</Text>
+              <Text style={styles.cartBarTotal}>{'\u00A3'}{cartTotal.toFixed(2)}</Text>
+            </LinearGradient>
           </Pressable>
         </Animated.View>
       )}
@@ -102,36 +103,34 @@ export default function MenuScreen() {
   );
 }
 
-function MenuItemCard({ item, onAdd, delay }: { item: any; onAdd: (item: any) => void; delay: number }) {
-  const itemIcon = item.category === 'Starters' ? 'leaf' : item.category === 'Mains' ? 'restaurant' : item.category === 'Desserts' ? 'ice-cream' : 'wine';
+function MenuCard({ item, onAdd, delay }: { item: any; onAdd: (item: any) => void; delay: number }) {
+  const cfg = CAT_ICONS[item.category] || CAT_ICONS.All;
   return (
     <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
       <View style={styles.menuCard}>
-        <View style={styles.menuCardContent}>
-          <View style={styles.menuCardLeft}>
-            <View style={styles.menuItemHeader}>
-              <Text style={styles.menuItemName}>{item.name}</Text>
-              {item.popular && (
-                <View style={styles.popularBadge}>
-                  <Ionicons name="flame" size={10} color={Colors.error} />
-                  <Text style={styles.popularText}>Popular</Text>
-                </View>
-              )}
-            </View>
-            <Text style={styles.menuItemDesc} numberOfLines={2}>{item.description}</Text>
-            <Text style={styles.menuItemPrice}>{'\u00A3'}{item.price.toFixed(2)}</Text>
+        <View style={styles.menuCardMain}>
+          <View style={styles.menuCardInfo}>
+            {item.popular && (
+              <View style={styles.popularTag}>
+                <Ionicons name="flame" size={10} color="#FFF" />
+                <Text style={styles.popularText}>Popular</Text>
+              </View>
+            )}
+            <Text style={styles.menuName}>{item.name}</Text>
+            <Text style={styles.menuDesc} numberOfLines={2}>{item.description}</Text>
           </View>
-          <View style={styles.menuCardRight}>
-            <View style={styles.menuItemIcon}>
-              <Ionicons name={itemIcon as any} size={24} color={Colors.primary} />
-            </View>
-            <Pressable
-              style={({ pressed }) => [styles.addButton, pressed && { transform: [{ scale: 0.9 }] }]}
-              onPress={() => onAdd(item)}
-            >
-              <Ionicons name="add" size={22} color="#FFF" />
-            </Pressable>
+          <View style={[styles.menuIconBox, { backgroundColor: cfg.color + '12' }]}>
+            <Ionicons name={cfg.name as any} size={26} color={cfg.color} />
           </View>
+        </View>
+        <View style={styles.menuCardBottom}>
+          <Text style={styles.menuPrice}>{'\u00A3'}{item.price.toFixed(2)}</Text>
+          <Pressable
+            style={({ pressed }) => [styles.addBtn, pressed && { transform: [{ scale: 0.9 }] }]}
+            onPress={() => onAdd(item)}
+          >
+            <Ionicons name="add" size={20} color="#FFF" />
+          </Pressable>
         </View>
       </View>
     </Animated.View>
@@ -142,65 +141,64 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   topBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingBottom: 12, backgroundColor: '#FFF',
+    paddingHorizontal: 16, paddingBottom: 10,
   },
-  backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  topBarTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  cartButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  cartBadge: {
-    position: 'absolute', top: 2, right: 2, width: 18, height: 18, borderRadius: 9,
+  backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+  topTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  cartBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+  cartDot: {
+    position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: 9,
     backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center',
   },
-  cartBadgeText: { fontSize: 10, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
-  categoryBar: { backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: Colors.border, maxHeight: 56 },
-  categoryContent: { paddingHorizontal: 16, gap: 8, alignItems: 'center', paddingVertical: 10 },
-  categoryChip: {
+  cartDotText: { fontSize: 10, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+
+  catBar: { maxHeight: 54 },
+  catContent: { paddingHorizontal: 20, gap: 8, alignItems: 'center', paddingVertical: 8 },
+  catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: Colors.surface,
+    paddingHorizontal: 16, paddingVertical: 9, borderRadius: 14, backgroundColor: '#FFF',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
   },
-  categoryChipActive: { backgroundColor: Colors.primary },
-  categoryText: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  categoryTextActive: { color: '#FFF' },
-  menuList: { padding: 16, paddingBottom: 140, gap: 12 },
+  catText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary },
+
+  menuList: { padding: 20, paddingBottom: 140, gap: 12 },
   menuCard: {
-    backgroundColor: '#FFF', borderRadius: 16, padding: 16,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+    backgroundColor: '#FFF', borderRadius: 20, padding: 18,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2,
   },
-  menuCardContent: { flexDirection: 'row' },
-  menuCardLeft: { flex: 1, paddingRight: 12 },
-  menuItemHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  menuItemName: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  popularBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: Colors.error + '10',
-    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6,
+  menuCardMain: { flexDirection: 'row', marginBottom: 14 },
+  menuCardInfo: { flex: 1, paddingRight: 14 },
+  popularTag: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.error,
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, alignSelf: 'flex-start', marginBottom: 8,
   },
-  popularText: { fontSize: 10, fontFamily: 'Poppins_500Medium', color: Colors.error },
-  menuItemDesc: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 18, marginBottom: 8 },
-  menuItemPrice: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.primary },
-  menuCardRight: { alignItems: 'center', justifyContent: 'space-between' },
-  menuItemIcon: {
-    width: 56, height: 56, borderRadius: 14, backgroundColor: Colors.primary + '10',
+  popularText: { fontSize: 10, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  menuName: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 4 },
+  menuDesc: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 19 },
+  menuIconBox: {
+    width: 58, height: 58, borderRadius: 16, justifyContent: 'center', alignItems: 'center',
+  },
+  menuCardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  menuPrice: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  addBtn: {
+    width: 40, height: 40, borderRadius: 14, backgroundColor: '#1A1A1A',
     justifyContent: 'center', alignItems: 'center',
   },
-  addButton: {
-    width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.primary,
-    justifyContent: 'center', alignItems: 'center', marginTop: 8,
-  },
+
   cartBar: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
-    paddingHorizontal: 16, paddingTop: 12, backgroundColor: '#FFF',
-    borderTopWidth: 1, borderTopColor: Colors.border,
+    paddingHorizontal: 20, paddingTop: 12, backgroundColor: Colors.background,
   },
-  viewCartButton: {
+  cartBarInner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 18,
+    borderRadius: 18, paddingVertical: 16, paddingHorizontal: 20,
   },
-  cartInfo: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  cartBarLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   cartCount: {
-    width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,255,255,0.25)',
+    width: 28, height: 28, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.15)',
     justifyContent: 'center', alignItems: 'center',
   },
-  cartCountText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
-  viewCartText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
-  cartTotalText: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  cartCountText: { fontSize: 13, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  cartBarLabel: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  cartBarTotal: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: '#FFF' },
 });

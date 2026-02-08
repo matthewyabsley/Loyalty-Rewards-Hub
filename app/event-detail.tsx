@@ -8,13 +8,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useData } from '@/lib/data-context';
 import { useAuth } from '@/lib/auth-context';
 import Colors from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'Tasting': '#8B5AE8',
-  'Dining': '#E8735A',
-  'Entertainment': '#5A9AE8',
-  'Workshop': Colors.accent,
+const CAT_GRADIENTS: Record<string, string[]> = {
+  'Tasting': ['#8B5AE8', '#7042D0'],
+  'Dining': ['#E8735A', '#D45A42'],
+  'Entertainment': ['#5A9AE8', '#4280D0'],
+  'Workshop': [Colors.accent, Colors.accentDark],
 };
 
 export default function EventDetailScreen() {
@@ -25,26 +26,21 @@ export default function EventDetailScreen() {
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const event = events.find(e => e.id === id);
-
   if (!event) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={styles.emptyText}>Event not found</Text>
+        <Ionicons name="alert-circle-outline" size={40} color={Colors.border} />
+        <Text style={styles.notFound}>Event not found</Text>
       </View>
     );
   }
 
-  const catColor = CATEGORY_COLORS[event.category] || Colors.primary;
+  const gradient = CAT_GRADIENTS[event.category] || [Colors.primary, Colors.primaryLight];
   const eventDate = new Date(event.date);
 
   async function handleBook() {
-    if (event.spotsLeft <= 0) {
-      Alert.alert('Sold Out', 'This event is fully booked.');
-      return;
-    }
-    try {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {}
+    if (event.spotsLeft <= 0) { Alert.alert('Sold Out', 'This event is fully booked.'); return; }
+    try { await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     await bookEvent(event.id);
     await updatePoints(30);
     await addTransaction({
@@ -53,76 +49,70 @@ export default function EventDetailScreen() {
       date: new Date().toISOString().split('T')[0],
       type: 'earned',
     });
-    Alert.alert(
-      'Event Booked!',
-      `You've booked a spot for ${event.title}. You earned 30 points!`,
-      [{ text: 'Awesome!', onPress: () => router.back() }]
-    );
+    Alert.alert('Booked!', `You're going to ${event.title}.\n\nYou earned 30 points!`, [{ text: 'Done', onPress: () => router.back() }]);
   }
 
   return (
     <View style={styles.container}>
-      <View style={[styles.topBar, { paddingTop: insets.top + webTopInset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
-        </Pressable>
-        <Text style={styles.topBarTitle}>Event Details</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <View style={[styles.heroSection, { backgroundColor: catColor + '12' }]}>
-          <Ionicons name={event.icon as any} size={56} color={catColor} />
-          <View style={[styles.categoryTag, { backgroundColor: catColor + '25' }]}>
-            <Text style={[styles.categoryTagText, { color: catColor }]}>{event.category}</Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
+        <LinearGradient colors={gradient} style={[styles.hero, { paddingTop: insets.top + webTopInset + 8 }]}>
+          <Pressable onPress={() => router.back()} style={styles.heroBack}>
+            <Ionicons name="chevron-back" size={24} color="#FFF" />
+          </Pressable>
+          <View style={styles.heroContent}>
+            <Ionicons name={event.icon as any} size={52} color="rgba(255,255,255,0.9)" />
+            <View style={styles.heroTag}>
+              <Text style={styles.heroTagText}>{event.category}</Text>
+            </View>
           </View>
-        </View>
+        </LinearGradient>
 
         <View style={styles.details}>
           <Text style={styles.title}>{event.title}</Text>
           <Text style={styles.description}>{event.description}</Text>
 
-          <View style={styles.infoGrid}>
-            <InfoRow icon="calendar-outline" label="Date" value={eventDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} />
-            <InfoRow icon="time-outline" label="Time" value={event.time} />
-            <InfoRow icon="people-outline" label="Spots Left" value={`${event.spotsLeft} remaining`} />
-            <InfoRow icon="pricetag-outline" label="Price" value={`\u00A3${event.price} per person`} />
+          <View style={styles.infoCard}>
+            <InfoRow icon="calendar" label="Date" value={eventDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} />
+            <InfoRow icon="time" label="Time" value={event.time} />
+            <InfoRow icon="people" label="Availability" value={`${event.spotsLeft} spots remaining`} />
+            <InfoRow icon="pricetag" label="Price" value={`\u00A3${event.price} per person`} last />
           </View>
 
           <View style={styles.pointsBanner}>
-            <Ionicons name="star" size={18} color={Colors.accent} />
-            <Text style={styles.pointsBannerText}>Earn 30 loyalty points when you book this event</Text>
+            <Ionicons name="star" size={17} color={Colors.accent} />
+            <Text style={styles.pointsBannerText}>Earn 30 loyalty points</Text>
           </View>
         </View>
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 0) + 12 }]}>
-        <View style={styles.footerPrice}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 0) + 14 }]}>
+        <View style={styles.footerLeft}>
           <Text style={styles.footerPriceLabel}>Total</Text>
           <Text style={styles.footerPriceValue}>{'\u00A3'}{event.price}</Text>
         </View>
         <Pressable
-          style={({ pressed }) => [
-            styles.bookButton,
-            event.spotsLeft <= 0 && styles.bookButtonDisabled,
-            pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-          ]}
+          style={({ pressed }) => [pressed && { transform: [{ scale: 0.97 }] }]}
           onPress={handleBook}
           disabled={event.spotsLeft <= 0}
         >
-          <Text style={styles.bookButtonText}>
-            {event.spotsLeft <= 0 ? 'Sold Out' : 'Book Now'}
-          </Text>
+          <LinearGradient
+            colors={event.spotsLeft <= 0 ? ['#CCC', '#BBB'] : ['#1A1A1A', '#2D2D2D']}
+            style={styles.bookBtn}
+          >
+            <Text style={styles.bookBtnText}>{event.spotsLeft <= 0 ? 'Sold Out' : 'Book Now'}</Text>
+          </LinearGradient>
         </Pressable>
       </View>
     </View>
   );
 }
 
-function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+function InfoRow({ icon, label, value, last }: { icon: string; label: string; value: string; last?: boolean }) {
   return (
-    <View style={styles.infoRow}>
-      <Ionicons name={icon as any} size={20} color={Colors.textSecondary} />
+    <View style={[styles.infoRow, !last && styles.infoRowBorder]}>
+      <View style={styles.infoIconWrap}>
+        <Ionicons name={icon as any} size={18} color={Colors.primary} />
+      </View>
       <View style={styles.infoContent}>
         <Text style={styles.infoLabel}>{label}</Text>
         <Text style={styles.infoValue}>{value}</Text>
@@ -133,51 +123,48 @@ function InfoRow({ icon, label, value }: { icon: string; label: string; value: s
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  topBar: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingBottom: 12, backgroundColor: '#FFF',
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
+  notFound: { fontSize: 15, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary, marginTop: 12 },
+
+  hero: { height: 220, justifyContent: 'space-between', paddingBottom: 0 },
+  heroBack: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center', marginLeft: 8 },
+  heroContent: { alignItems: 'center', gap: 14, paddingBottom: 28 },
+  heroTag: {
+    backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20,
   },
-  backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  topBarTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  content: { paddingBottom: 120 },
-  heroSection: {
-    height: 180, justifyContent: 'center', alignItems: 'center', gap: 14,
-  },
-  categoryTag: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
-  categoryTagText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold' },
-  details: { padding: 24, gap: 16 },
-  title: { fontSize: 24, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  heroTagText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+
+  details: { padding: 24, gap: 18 },
+  title: { fontSize: 26, fontFamily: 'Poppins_700Bold', color: Colors.text },
   description: { fontSize: 15, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 24 },
-  infoGrid: {
-    backgroundColor: '#FFF', borderRadius: 16, padding: 4, gap: 0,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
+
+  infoCard: {
+    backgroundColor: '#FFF', borderRadius: 20, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2,
   },
-  infoRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 16,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
+  infoRow: { flexDirection: 'row', alignItems: 'center', padding: 18, gap: 14 },
+  infoRowBorder: { borderBottomWidth: 1, borderBottomColor: Colors.border },
+  infoIconWrap: {
+    width: 38, height: 38, borderRadius: 12, backgroundColor: Colors.primary + '0C',
+    justifyContent: 'center', alignItems: 'center',
   },
   infoContent: { flex: 1 },
-  infoLabel: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-  infoValue: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.text, marginTop: 1 },
+  infoLabel: { fontSize: 11, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginBottom: 1 },
+  infoValue: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+
   pointsBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.accent + '15',
-    padding: 16, borderRadius: 14,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: Colors.accent + '12', padding: 18, borderRadius: 16,
   },
-  pointsBannerText: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.accentDark, flex: 1 },
-  emptyText: { fontSize: 16, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  pointsBannerText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.accentDark },
+
   footer: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingTop: 14, backgroundColor: '#FFF',
-    borderTopWidth: 1, borderTopColor: Colors.border,
+    paddingHorizontal: 24, paddingTop: 14, backgroundColor: Colors.background,
   },
-  footerPrice: {},
+  footerLeft: {},
   footerPriceLabel: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-  footerPriceValue: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  bookButton: {
-    backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32,
-  },
-  bookButtonDisabled: { opacity: 0.4 },
-  bookButtonText: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  footerPriceValue: { fontSize: 24, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  bookBtn: { borderRadius: 16, paddingVertical: 16, paddingHorizontal: 36 },
+  bookBtnText: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: '#FFF' },
 });

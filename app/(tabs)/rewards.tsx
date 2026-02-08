@@ -9,61 +9,64 @@ import Colors from '@/constants/colors';
 import QRCode from 'react-native-qrcode-svg';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width - 48;
+const CARD_WIDTH = width - 56;
+
+const TYPE_CONFIG = {
+  discount: { gradient: ['#E8735A', '#D45A42'] as const, icon: 'pricetag' as const, label: 'Discount' },
+  credit: { gradient: [Colors.success, '#18945A'] as const, icon: 'wallet' as const, label: 'Credit' },
+  offer: { gradient: [Colors.accent, Colors.accentDark] as const, icon: 'star' as const, label: 'Offer' },
+};
 
 export default function RewardsScreen() {
   const insets = useSafeAreaInsets();
   const { rewards, claimReward } = useData();
   const [activeIndex, setActiveIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const activeRewards = rewards.filter(r => !r.claimed);
   const claimedRewards = rewards.filter(r => r.claimed);
 
   async function handleClaim(rewardId: string) {
-    try {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {}
+    try { await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     Alert.alert(
       'Claim Reward',
-      'Show this QR code to your server to claim this reward.',
+      'Show this QR code to your server to redeem.',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Mark as Claimed', onPress: () => claimReward(rewardId) },
+        { text: 'Not Yet', style: 'cancel' },
+        { text: 'Mark Claimed', onPress: () => claimReward(rewardId) },
       ]
     );
   }
 
   function onViewableItemsChanged({ viewableItems }: any) {
-    if (viewableItems.length > 0) {
-      setActiveIndex(viewableItems[0].index ?? 0);
-    }
+    if (viewableItems.length > 0) setActiveIndex(viewableItems[0].index ?? 0);
   }
-
-  const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 };
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + webTopInset + 12 }]}>
-        <Text style={styles.headerTitle}>My Rewards</Text>
-        <Text style={styles.headerSubtitle}>
-          {activeRewards.length} active reward{activeRewards.length !== 1 ? 's' : ''}
-        </Text>
+      <View style={[styles.header, { paddingTop: insets.top + webTopInset + 16 }]}>
+        <View>
+          <Text style={styles.headerTitle}>Rewards</Text>
+          <Text style={styles.headerCount}>
+            {activeRewards.length} active{activeRewards.length === 1 ? '' : ''} reward{activeRewards.length !== 1 ? 's' : ''}
+          </Text>
+        </View>
       </View>
 
       {activeRewards.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="gift-outline" size={60} color="#DDD" />
+          <View style={styles.emptyIcon}>
+            <Ionicons name="gift-outline" size={44} color={Colors.border} />
+          </View>
           <Text style={styles.emptyTitle}>No rewards yet</Text>
-          <Text style={styles.emptySubtitle}>Keep dining with us to earn rewards</Text>
+          <Text style={styles.emptySubtitle}>Dine with us to unlock exclusive rewards</Text>
         </View>
       ) : (
         <>
           <FlatList
-            ref={flatListRef}
             data={activeRewards}
             horizontal
             pagingEnabled
@@ -72,7 +75,7 @@ export default function RewardsScreen() {
             decelerationRate="fast"
             contentContainerStyle={styles.cardList}
             onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={viewabilityConfig}
+            viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
             keyExtractor={item => item.id}
             renderItem={({ item }) => <RewardCard reward={item} onClaim={handleClaim} />}
           />
@@ -86,16 +89,22 @@ export default function RewardsScreen() {
 
       {claimedRewards.length > 0 && (
         <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.claimedSection}>
-          <Text style={styles.claimedTitle}>Claimed</Text>
-          {claimedRewards.map(reward => (
-            <View key={reward.id} style={styles.claimedItem}>
-              <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
-              <View style={styles.claimedInfo}>
-                <Text style={styles.claimedName}>{reward.title}</Text>
-                <Text style={styles.claimedValue}>{reward.value}</Text>
+          <Text style={styles.claimedHeader}>Redeemed</Text>
+          {claimedRewards.map(reward => {
+            const cfg = TYPE_CONFIG[reward.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.offer;
+            return (
+              <View key={reward.id} style={styles.claimedRow}>
+                <View style={[styles.claimedIcon, { backgroundColor: cfg.gradient[0] + '15' }]}>
+                  <Ionicons name={cfg.icon} size={16} color={cfg.gradient[0]} />
+                </View>
+                <View style={styles.claimedInfo}>
+                  <Text style={styles.claimedName}>{reward.title}</Text>
+                  <Text style={styles.claimedVal}>{reward.value}</Text>
+                </View>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
               </View>
-            </View>
-          ))}
+            );
+          })}
         </Animated.View>
       )}
     </View>
@@ -103,87 +112,102 @@ export default function RewardsScreen() {
 }
 
 function RewardCard({ reward, onClaim }: { reward: any; onClaim: (id: string) => void }) {
-  const typeConfig = {
-    discount: { color: '#E8735A', bg: '#FEF0ED', icon: 'pricetag' as const },
-    credit: { color: Colors.success, bg: '#E8F8F0', icon: 'wallet' as const },
-    offer: { color: Colors.accent, bg: '#FFF8EB', icon: 'star' as const },
-  };
-  const config = typeConfig[reward.type as keyof typeof typeConfig] || typeConfig.offer;
+  const cfg = TYPE_CONFIG[reward.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.offer;
 
   return (
-    <Animated.View entering={FadeIn.duration(600)} style={styles.card}>
-      <View style={[styles.cardHeader, { backgroundColor: config.bg }]}>
-        <View style={styles.cardHeaderContent}>
-          <View style={[styles.typeBadge, { backgroundColor: config.color }]}>
-            <Ionicons name={config.icon} size={14} color="#FFF" />
-            <Text style={styles.typeBadgeText}>{reward.type}</Text>
+    <Animated.View entering={FadeIn.duration(500)} style={styles.card}>
+      <LinearGradient
+        colors={[cfg.gradient[0], cfg.gradient[1]]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0.6 }}
+        style={styles.cardTop}
+      >
+        <View style={styles.cardTopRow}>
+          <View style={styles.typePill}>
+            <Ionicons name={cfg.icon} size={13} color="#FFF" />
+            <Text style={styles.typePillText}>{cfg.label}</Text>
           </View>
-          <Text style={styles.cardValue}>{reward.value}</Text>
+          <Text style={styles.cardValueBig}>{reward.value}</Text>
         </View>
         <Text style={styles.cardTitle}>{reward.title}</Text>
-        <Text style={styles.cardDescription}>{reward.description}</Text>
-      </View>
-      <View style={styles.cardBody}>
-        <View style={styles.qrContainer}>
-          <QRCode value={reward.code} size={140} color={Colors.text} backgroundColor="transparent" />
+        <Text style={styles.cardDesc}>{reward.description}</Text>
+      </LinearGradient>
+
+      <View style={styles.cardBottom}>
+        <View style={styles.qrSection}>
+          <View style={styles.qrBox}>
+            <QRCode value={reward.code} size={120} color="#1A1A1A" backgroundColor="transparent" />
+          </View>
+          <Text style={styles.codeLabel}>{reward.code}</Text>
+          <Text style={styles.expiryLabel}>
+            Expires {new Date(reward.expiryDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+          </Text>
         </View>
-        <Text style={styles.codeText}>{reward.code}</Text>
-        <Text style={styles.expiryText}>
-          Expires {new Date(reward.expiryDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-        </Text>
+        <Pressable
+          style={({ pressed }) => [styles.claimBtn, pressed && { transform: [{ scale: 0.97 }], opacity: 0.9 }]}
+          onPress={() => onClaim(reward.id)}
+        >
+          <Ionicons name="checkmark-circle" size={20} color="#FFF" />
+          <Text style={styles.claimBtnText}>Claim</Text>
+        </Pressable>
       </View>
-      <Pressable
-        style={({ pressed }) => [styles.claimButton, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}
-        onPress={() => onClaim(reward.id)}
-      >
-        <Ionicons name="checkmark-circle-outline" size={20} color="#FFF" />
-        <Text style={styles.claimButtonText}>Claim Reward</Text>
-      </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { paddingHorizontal: 24, paddingBottom: 16 },
-  headerTitle: { fontSize: 28, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  headerSubtitle: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginTop: 2 },
-  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12, paddingBottom: 100 },
-  emptyTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary },
-  emptySubtitle: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: '#BBB' },
-  cardList: { paddingHorizontal: 24, paddingTop: 8 },
+  header: { paddingHorizontal: 24, paddingBottom: 12 },
+  headerTitle: { fontSize: 30, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  headerCount: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginTop: -2 },
+
+  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 14, paddingBottom: 120 },
+  emptyIcon: {
+    width: 80, height: 80, borderRadius: 40, backgroundColor: Colors.surface,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 4,
+  },
+  emptyTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  emptySubtitle: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+
+  cardList: { paddingHorizontal: 28, paddingTop: 12 },
   card: {
-    width: CARD_WIDTH, marginRight: 16, backgroundColor: '#FFF', borderRadius: 24,
-    overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 4,
+    width: CARD_WIDTH, marginRight: 16, backgroundColor: '#FFF', borderRadius: 24, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 6,
   },
-  cardHeader: { padding: 20, paddingBottom: 16 },
-  cardHeaderContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  typeBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  typeBadgeText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold', color: '#FFF', textTransform: 'capitalize' },
-  cardValue: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  cardTitle: { fontSize: 17, fontFamily: 'Poppins_600SemiBold', color: Colors.text, marginBottom: 4 },
-  cardDescription: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 18 },
-  cardBody: { alignItems: 'center', paddingVertical: 24, gap: 12 },
-  qrContainer: {
-    padding: 16, backgroundColor: '#F8F8F8', borderRadius: 16,
+  cardTop: { padding: 22, paddingBottom: 18 },
+  cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  typePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
   },
-  codeText: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary, letterSpacing: 1 },
-  expiryText: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: '#AAA' },
-  claimButton: {
+  typePillText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  cardValueBig: { fontSize: 26, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  cardTitle: { fontSize: 17, fontFamily: 'Poppins_600SemiBold', color: '#FFF', marginBottom: 4 },
+  cardDesc: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: 'rgba(255,255,255,0.8)', lineHeight: 18 },
+
+  cardBottom: { alignItems: 'center', padding: 22, gap: 16 },
+  qrSection: { alignItems: 'center', gap: 10 },
+  qrBox: { padding: 14, backgroundColor: '#F8F7F4', borderRadius: 18 },
+  codeLabel: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary, letterSpacing: 1.2 },
+  expiryLabel: { fontSize: 11, fontFamily: 'Poppins_400Regular', color: '#B5B5B5' },
+  claimBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: Colors.primary, margin: 16, marginTop: 0, paddingVertical: 14, borderRadius: 14,
+    backgroundColor: '#1A1A1A', paddingVertical: 14, paddingHorizontal: 40, borderRadius: 16, width: '100%',
   },
-  claimButtonText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
-  pagination: { flexDirection: 'row', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#DDD' },
-  dotActive: { backgroundColor: Colors.primary, width: 24 },
+  claimBtnText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+
+  pagination: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingVertical: 18 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.border },
+  dotActive: { backgroundColor: Colors.primary, width: 28, borderRadius: 14 },
+
   claimedSection: { paddingHorizontal: 24, paddingBottom: 120 },
-  claimedTitle: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary, marginBottom: 10 },
-  claimedItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
+  claimedHeader: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.textSecondary, marginBottom: 12 },
+  claimedRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
+  claimedIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   claimedInfo: { flex: 1 },
-  claimedName: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  claimedValue: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: '#BBB' },
+  claimedName: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.text },
+  claimedVal: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
 });
