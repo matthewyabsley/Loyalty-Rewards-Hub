@@ -75,10 +75,10 @@ export default function HomeScreen() {
                 <Text style={styles.balanceStatLabel}>Rewards</Text>
                 <Text style={styles.balanceStatValue}>{unclaimedRewards}</Text>
               </View>
-              <View style={styles.balanceStat}>
+              <Pressable style={styles.balanceStat} onPress={() => router.push('/(tabs)/bookings')}>
                 <Text style={styles.balanceStatLabel}>Bookings</Text>
-                <Text style={styles.balanceStatValue}>{bookings.length}</Text>
-              </View>
+                <Text style={styles.balanceStatValue}>{bookings.filter(b => b.status !== 'cancelled').length}</Text>
+              </Pressable>
             </View>
           </LinearGradient>
         </Animated.View>
@@ -121,10 +121,15 @@ export default function HomeScreen() {
           </View>
         </Animated.View>
 
-        {bookings.length > 0 && (
+        {bookings.filter(b => b.status !== 'cancelled').length > 0 && (
           <Animated.View entering={FadeInDown.delay(240).duration(500)} style={styles.section}>
-            <Text style={styles.sectionTitle}>Upcoming</Text>
-            {bookings.slice(0, 2).map(booking => (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Upcoming</Text>
+              <Pressable onPress={() => router.push('/(tabs)/bookings')}>
+                <Text style={styles.seeAll}>See all</Text>
+              </Pressable>
+            </View>
+            {bookings.filter(b => b.status !== 'cancelled').slice(0, 2).map(booking => (
               <View key={booking.id} style={styles.bookingCard}>
                 <View style={styles.bookingDateBlock}>
                   <Text style={styles.bookingDayNum}>
