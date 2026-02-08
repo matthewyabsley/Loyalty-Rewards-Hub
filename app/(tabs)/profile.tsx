@@ -18,15 +18,11 @@ export default function ProfileScreen() {
   const unreadCount = notifications.filter(n => !n.read).length;
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
-  function handleSignOut() {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: async () => { await signOut(); router.replace('/'); } },
-      ]
-    );
+  async function handleSignOut() {
+    try {
+      await signOut();
+    } catch {}
+    router.replace('/');
   }
 
   const menuGroups = [
