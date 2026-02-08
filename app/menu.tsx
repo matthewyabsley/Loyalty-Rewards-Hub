@@ -53,27 +53,29 @@ export default function MenuScreen() {
         </Pressable>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catBar} contentContainerStyle={styles.catContent}>
-        {CATEGORIES.map(cat => {
-          const active = activeCategory === cat;
-          const cfg = CAT_ICONS[cat];
-          return (
-            <Pressable key={cat} onPress={() => setActiveCategory(cat)}>
-              {active ? (
-                <LinearGradient colors={['#1A1A1A', '#2D2D2D']} style={styles.catChip}>
-                  <Ionicons name={cfg.name as any} size={15} color="#FFF" />
-                  <Text style={[styles.catText, { color: '#FFF' }]}>{cat}</Text>
-                </LinearGradient>
-              ) : (
-                <View style={styles.catChip}>
-                  <Ionicons name={cfg.name as any} size={15} color={Colors.textSecondary} />
-                  <Text style={styles.catText}>{cat}</Text>
-                </View>
-              )}
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <View style={styles.catBarWrap}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catContent}>
+          {CATEGORIES.map(cat => {
+            const active = activeCategory === cat;
+            const cfg = CAT_ICONS[cat];
+            return (
+              <Pressable key={cat} onPress={() => setActiveCategory(cat)}>
+                {active ? (
+                  <LinearGradient colors={['#1A1A1A', '#2D2D2D']} style={styles.catChip}>
+                    <Ionicons name={cfg.name as any} size={15} color="#FFF" />
+                    <Text style={[styles.catText, { color: '#FFF' }]}>{cat}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.catChip}>
+                    <Ionicons name={cfg.name as any} size={15} color={Colors.textSecondary} />
+                    <Text style={styles.catText}>{cat}</Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.menuList}>
         {filteredMenu.map((item, i) => (
@@ -152,11 +154,11 @@ const styles = StyleSheet.create({
   },
   cartDotText: { fontSize: 10, fontFamily: 'Poppins_700Bold', color: '#FFF' },
 
-  catBar: { flexGrow: 0, flexShrink: 0, minHeight: 56 },
-  catContent: { paddingHorizontal: 20, gap: 8, alignItems: 'center' },
+  catBarWrap: { height: 58, marginBottom: 4 },
+  catContent: { paddingHorizontal: 20, gap: 8, alignItems: 'center', height: 58, paddingVertical: 8 },
   catChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6, height: 42,
-    paddingHorizontal: 16, borderRadius: 14, backgroundColor: '#FFF',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingHorizontal: 16, height: 42, borderRadius: 14, backgroundColor: '#FFF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
   },
   catText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary },
