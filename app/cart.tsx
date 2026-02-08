@@ -71,29 +71,51 @@ export default function CartScreen() {
       ) : (
         <>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.cartContent}>
-            {cart.map(ci => (
-              <View key={ci.item.id} style={styles.cartItem}>
-                <View style={styles.cartItemTop}>
-                  <Text style={styles.cartItemName}>{ci.item.name}</Text>
-                  <Text style={styles.cartItemPrice}>{'\u00A3'}{(ci.item.price * ci.quantity).toFixed(2)}</Text>
+            {cart.map(ci => {
+              const optionsPrice = ci.selectedOptions
+                ? Object.values(ci.selectedOptions).reduce((s, o) => s + o.price, 0)
+                : 0;
+              const itemTotal = (ci.item.price + optionsPrice) * ci.quantity;
+              const optionsList = ci.selectedOptions ? Object.values(ci.selectedOptions) : [];
+              return (
+                <View key={ci.cartId} style={styles.cartItem}>
+                  <View style={styles.cartItemTop}>
+                    <Text style={styles.cartItemName}>{ci.item.name}</Text>
+                    <Text style={styles.cartItemPrice}>{'\u00A3'}{itemTotal.toFixed(2)}</Text>
+                  </View>
+                  {optionsList.length > 0 && (
+                    <View style={styles.cartOptionsRow}>
+                      {optionsList.map((opt, idx) => (
+                        <Text key={idx} style={styles.cartOptionText}>
+                          {opt.name}{opt.price > 0 ? ` (+\u00A3${opt.price.toFixed(2)})` : ''}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+                  {ci.notes ? (
+                    <View style={styles.cartNoteRow}>
+                      <Ionicons name="chatbubble-outline" size={12} color={Colors.textSecondary} />
+                      <Text style={styles.cartNoteText} numberOfLines={1}>{ci.notes}</Text>
+                    </View>
+                  ) : null}
+                  <View style={styles.qtyRow}>
+                    <Pressable
+                      style={({ pressed }) => [styles.qtyBtn, pressed && { opacity: 0.7 }]}
+                      onPress={() => updateCartQuantity(ci.cartId, ci.quantity - 1)}
+                    >
+                      <Ionicons name={ci.quantity === 1 ? 'trash-outline' : 'remove'} size={16} color={ci.quantity === 1 ? Colors.error : Colors.text} />
+                    </Pressable>
+                    <Text style={styles.qtyVal}>{ci.quantity}</Text>
+                    <Pressable
+                      style={({ pressed }) => [styles.qtyBtn, pressed && { opacity: 0.7 }]}
+                      onPress={() => updateCartQuantity(ci.cartId, ci.quantity + 1)}
+                    >
+                      <Ionicons name="add" size={16} color={Colors.text} />
+                    </Pressable>
+                  </View>
                 </View>
-                <View style={styles.qtyRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.qtyBtn, pressed && { opacity: 0.7 }]}
-                    onPress={() => updateCartQuantity(ci.item.id, ci.quantity - 1)}
-                  >
-                    <Ionicons name={ci.quantity === 1 ? 'trash-outline' : 'remove'} size={16} color={ci.quantity === 1 ? Colors.error : Colors.text} />
-                  </Pressable>
-                  <Text style={styles.qtyVal}>{ci.quantity}</Text>
-                  <Pressable
-                    style={({ pressed }) => [styles.qtyBtn, pressed && { opacity: 0.7 }]}
-                    onPress={() => updateCartQuantity(ci.item.id, ci.quantity + 1)}
-                  >
-                    <Ionicons name="add" size={16} color={Colors.text} />
-                  </Pressable>
-                </View>
-              </View>
-            ))}
+              );
+            })}
 
             <View style={styles.summaryCard}>
               <SummaryLine label="Subtotal" value={`\u00A3${cartTotal.toFixed(2)}`} />
@@ -169,9 +191,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF', borderRadius: 18, padding: 18,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
-  cartItemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  cartItemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   cartItemName: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text, flex: 1 },
   cartItemPrice: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  cartOptionsRow: { marginBottom: 8, gap: 2 },
+  cartOptionText: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  cartNoteRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  cartNoteText: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, fontStyle: 'italic' as const, flex: 1 },
   qtyRow: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   qtyBtn: {
     width: 38, height: 38, borderRadius: 12, backgroundColor: Colors.surface,
