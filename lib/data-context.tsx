@@ -69,6 +69,7 @@ interface DataContextValue {
   clearCart: () => void;
   cartTotal: number;
   addBooking: (booking: Omit<Booking, 'id'>) => Promise<void>;
+  cancelBooking: (bookingId: string) => Promise<void>;
   bookEvent: (eventId: string) => Promise<void>;
   claimReward: (rewardId: string) => Promise<void>;
   addTransaction: (tx: Omit<PointsTransaction, 'id'>) => Promise<void>;
@@ -179,6 +180,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.setItem('bookings', JSON.stringify(updated));
   }
 
+  async function cancelBooking(bookingId: string) {
+    const updated = bookings.map(b =>
+      b.id === bookingId ? { ...b, status: 'cancelled' as const } : b
+    );
+    setBookings(updated);
+    await AsyncStorage.setItem('bookings', JSON.stringify(updated));
+  }
+
   async function bookEvent(eventId: string) {
     setEvents(prev => prev.map(e =>
       e.id === eventId ? { ...e, spotsLeft: Math.max(0, e.spotsLeft - 1) } : e
@@ -216,6 +225,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     clearCart,
     cartTotal,
     addBooking,
+    cancelBooking,
     bookEvent,
     claimReward,
     addTransaction,
