@@ -63,7 +63,7 @@ export default function WelcomeScreen() {
           <View style={styles.logoContainer}>
             <Ionicons name="restaurant" size={44} color={Colors.accent} />
           </View>
-          <Text style={styles.title}>Dine & Earn</Text>
+          <Text style={styles.title}>Tap Yard</Text>
           <Text style={styles.subtitle}>Your loyalty, rewarded</Text>
         </Animated.View>
 

@@ -138,7 +138,7 @@ export default function GiftVouchersScreen() {
                   <View style={styles.voucherTopRow}>
                     <View style={styles.voucherLogoArea}>
                       <Ionicons name="restaurant" size={18} color="rgba(255,255,255,0.8)" />
-                      <Text style={styles.voucherBrand}>Dine & Earn</Text>
+                      <Text style={styles.voucherBrand}>Tap Yard</Text>
                     </View>
                     <Text style={styles.voucherLabel}>GIFT VOUCHER</Text>
                   </View>
@@ -178,7 +178,7 @@ export default function GiftVouchersScreen() {
                     end={{ x: 1, y: 1 }}
                     style={styles.modalVoucherPreview}
                   >
-                    <Text style={styles.modalPreviewBrand}>Dine & Earn</Text>
+                    <Text style={styles.modalPreviewBrand}>Tap Yard</Text>
                     <Text style={styles.modalPreviewAmount}>£{selectedAmount}</Text>
                     <Text style={styles.modalPreviewLabel}>Gift Voucher</Text>
                   </LinearGradient>

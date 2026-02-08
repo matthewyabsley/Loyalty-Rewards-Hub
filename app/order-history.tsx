@@ -80,7 +80,7 @@ export default function OrderHistoryScreen() {
           </style></head>
           <body>
             <div class="header">
-              <h1>Dine & Earn</h1>
+              <h1>Tap Yard</h1>
               <p>Receipt</p>
             </div>
             <div class="divider"></div>

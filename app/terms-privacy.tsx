@@ -11,7 +11,7 @@ type TabKey = 'terms' | 'privacy';
 const TERMS_SECTIONS = [
   {
     title: '1. Acceptance of Terms',
-    content: 'By downloading, installing, or using the Dine & Earn app, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+    content: 'By downloading, installing, or using the Tap Yard app, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
   },
   {
     title: '2. Account Registration',
@@ -31,7 +31,7 @@ const TERMS_SECTIONS = [
   },
   {
     title: '6. Limitation of Liability',
-    content: 'Dine & Earn shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app or services.',
+    content: 'Tap Yard shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app or services.',
   },
 ];
 
