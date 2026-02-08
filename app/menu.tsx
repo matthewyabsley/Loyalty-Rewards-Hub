@@ -152,11 +152,11 @@ const styles = StyleSheet.create({
   },
   cartDotText: { fontSize: 10, fontFamily: 'Poppins_700Bold', color: '#FFF' },
 
-  catBar: { flexGrow: 0, flexShrink: 0 },
-  catContent: { paddingHorizontal: 20, gap: 8, alignItems: 'center', paddingVertical: 10 },
+  catBar: { flexGrow: 0, flexShrink: 0, minHeight: 56 },
+  catContent: { paddingHorizontal: 20, gap: 8, alignItems: 'center' },
   catChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, backgroundColor: '#FFF',
+    flexDirection: 'row', alignItems: 'center', gap: 6, height: 42,
+    paddingHorizontal: 16, borderRadius: 14, backgroundColor: '#FFF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
   },
   catText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary },
