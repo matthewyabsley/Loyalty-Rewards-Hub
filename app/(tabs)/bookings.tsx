@@ -117,7 +117,9 @@ function BookingCard({ booking, onCancel, delay, isCancelled }: {
   booking: any; onCancel: (id: string) => void; delay: number; isCancelled?: boolean;
 }) {
   const bookingDate = new Date(booking.date);
-  const isPast = bookingDate < new Date();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isPast = bookingDate < today;
   const dayName = bookingDate.toLocaleDateString('en-GB', { weekday: 'short' });
   const dayNum = bookingDate.getDate();
   const monthName = bookingDate.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase();
@@ -162,6 +164,9 @@ function BookingCard({ booking, onCancel, delay, isCancelled }: {
 
           {!isCancelled && !isPast && (
             <Pressable
+              testID={`cancel-booking-${booking.id}`}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel booking"
               style={({ pressed }) => [styles.cancelBtn, pressed && { opacity: 0.7 }]}
               onPress={() => onCancel(booking.id)}
             >
