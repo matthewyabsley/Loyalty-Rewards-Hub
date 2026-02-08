@@ -469,7 +469,7 @@ const custStyles = StyleSheet.create({
     position: 'absolute' as const, top: 0, left: 0, right: 0, bottom: 0,
   },
   keyboardWrap: {
-    width: '80%', maxHeight: '80%',
+    width: '90%', maxHeight: '80%',
   },
   modal: {
     backgroundColor: Colors.background,
@@ -486,16 +486,16 @@ const custStyles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
   header: { flexDirection: 'row', marginBottom: 20 },
   headerLeft: { flex: 1, paddingRight: 14 },
-  itemName: { fontSize: 20, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 4 },
-  itemDesc: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 19, marginBottom: 6 },
-  itemBasePrice: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  itemName: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 4 },
+  itemDesc: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 17, marginBottom: 6 },
+  itemBasePrice: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
   headerIcon: {
     width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center',
   },
 
   optionSection: { marginBottom: 18 },
   optionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  optionLabel: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  optionLabel: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   requiredBadge: {
     backgroundColor: Colors.primary + '14', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6,
   },
@@ -521,12 +521,12 @@ const custStyles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   checkboxSelected: { borderColor: Colors.primary, backgroundColor: Colors.primary },
-  choiceName: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.text },
+  choiceName: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.text },
   choiceNameSelected: { fontFamily: 'Poppins_600SemiBold' },
-  choicePrice: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
+  choicePrice: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
 
   notesSection: { marginBottom: 8 },
-  notesLabel: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text, marginBottom: 10 },
+  notesLabel: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text, marginBottom: 10 },
   notesInput: {
     backgroundColor: '#FFF', borderRadius: 14, borderWidth: 1.5, borderColor: Colors.border,
     paddingHorizontal: 14, paddingVertical: 12, minHeight: 72, maxHeight: 100,
@@ -534,8 +534,8 @@ const custStyles = StyleSheet.create({
   },
 
   footer: { paddingHorizontal: 20, paddingTop: 10 },
-  addToCartBtn: { borderRadius: 16, paddingVertical: 16, alignItems: 'center' },
-  addToCartText: { fontSize: 15, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  addToCartBtn: { borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
+  addToCartText: { fontSize: 14, fontFamily: 'Poppins_700Bold', color: '#FFF' },
   requiredHint: {
     fontSize: 11, fontFamily: 'Poppins_400Regular', color: Colors.error,
     textAlign: 'center', marginTop: 6,
