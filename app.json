@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Dine & Earn",
-    "slug": "dine-and-earn",
+    "name": "Tap Yard - Wilmslow",
+    "slug": "tapyardwilmslow",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "tapyardwilmslow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,10 +15,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.myapp"
+      "bundleIdentifier": "com.tapyardwilmslow.app"
     },
     "android": {
-      "package": "com.myapp",
+      "package": "com.tapyardwilmslow.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

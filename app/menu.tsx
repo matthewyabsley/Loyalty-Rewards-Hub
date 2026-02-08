@@ -389,10 +389,10 @@ function ItemCustomizeModal({ item, onClose, onAdd }: {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={custStyles.keyboardWrap}
         >
-          <Animated.View entering={FadeInUp.duration(300)} style={custStyles.modal}>
+          <View style={custStyles.modal}>
             <View style={custStyles.handle} />
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={custStyles.scrollContent}>
+            <ScrollView showsVerticalScrollIndicator={false} style={custStyles.scrollArea} contentContainerStyle={custStyles.scrollContent}>
               <View style={custStyles.header}>
                 <View style={custStyles.headerLeft}>
                   <Text style={custStyles.itemName}>{item.name}</Text>
@@ -484,7 +484,7 @@ function ItemCustomizeModal({ item, onClose, onAdd }: {
                 <Text style={custStyles.requiredHint}>Please select all required options</Text>
               )}
             </View>
-          </Animated.View>
+          </View>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -497,17 +497,19 @@ const custStyles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
   backdrop: {
-    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    position: 'absolute' as const, top: 0, left: 0, right: 0, bottom: 0,
   },
   keyboardWrap: {
-    width: '80%', maxHeight: '85%',
+    width: '80%', maxHeight: '80%',
   },
   modal: {
     backgroundColor: Colors.background,
     borderRadius: 24,
     overflow: 'hidden',
+    maxHeight: '100%',
     shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 30, elevation: 10,
   },
+  scrollArea: { flexShrink: 1 },
   handle: {
     width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.border,
     alignSelf: 'center', marginTop: 12, marginBottom: 4,

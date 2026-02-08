@@ -114,17 +114,17 @@ const SAMPLE_MENU: MenuItem[] = [
         { id: 'medium', name: 'Medium', price: 0 },
         { id: 'well-done', name: 'Well Done', price: 0 },
       ]},
-      { id: 'extras', label: 'Add Extras', choices: [
-        { id: 'bacon', name: 'Smoked Bacon', price: 2.00 },
-        { id: 'cheese', name: 'Cheddar Cheese', price: 1.50 },
-        { id: 'egg', name: 'Fried Egg', price: 1.50 },
-        { id: 'avocado', name: 'Avocado', price: 2.00 },
-      ]},
       { id: 'side', label: 'Choose a Side', required: true, choices: [
         { id: 'fries', name: 'Skin-on Fries', price: 0 },
         { id: 'sweet-fries', name: 'Sweet Potato Fries', price: 1.50 },
         { id: 'salad', name: 'Side Salad', price: 0 },
         { id: 'onion-rings', name: 'Onion Rings', price: 1.00 },
+      ]},
+      { id: 'extras', label: 'Add Extras', choices: [
+        { id: 'bacon', name: 'Smoked Bacon', price: 2.00 },
+        { id: 'cheese', name: 'Cheddar Cheese', price: 1.50 },
+        { id: 'egg', name: 'Fried Egg', price: 1.50 },
+        { id: 'avocado', name: 'Avocado', price: 2.00 },
       ]},
     ],
   },
@@ -216,8 +216,7 @@ const SAMPLE_MENU: MenuItem[] = [
         { id: 'mash', name: 'Truffle Mash', price: 2.00 },
         { id: 'salad', name: 'Rocket Salad', price: 0 },
       ]},
-      { id: 'sauce', label: 'Sauce', choices: [
-        { id: 'peppercorn', name: 'Peppercorn (included)', price: 0 },
+      { id: 'sauce', label: 'Extra Sauce', choices: [
         { id: 'bearnaise', name: 'B\u00e9arnaise', price: 1.50 },
         { id: 'blue-cheese', name: 'Blue Cheese', price: 1.50 },
       ]},
