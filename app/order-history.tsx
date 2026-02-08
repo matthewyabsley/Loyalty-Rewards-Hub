@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Share } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Share, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useData } from '@/lib/data-context';
+import { useData, Order } from '@/lib/data-context';
 import Colors from '@/constants/colors';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 
 const STATUS_CONFIG = {
   completed: { color: Colors.success, icon: 'checkmark-circle' as const, label: 'Completed' },
@@ -16,7 +17,7 @@ const STATUS_CONFIG = {
 
 export default function OrderHistoryScreen() {
   const insets = useSafeAreaInsets();
-  const { orders } = useData();
+  const { orders, menu, addToCart, clearCart } = useData();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   function formatDate(dateStr: string) {
@@ -27,6 +28,30 @@ export default function OrderHistoryScreen() {
   function formatTime(dateStr: string) {
     const d = new Date(dateStr);
     return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function handleOrderAgain(order: Order) {
+    try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+    clearCart();
+    let addedCount = 0;
+    for (const orderItem of order.items) {
+      const menuItem = menu.find(m => m.name === orderItem.name);
+      if (menuItem) {
+        for (let i = 0; i < orderItem.quantity; i++) {
+          addToCart(menuItem);
+          addedCount++;
+        }
+      }
+    }
+    if (addedCount > 0) {
+      Alert.alert(
+        'Items Added',
+        `${addedCount} item${addedCount > 1 ? 's' : ''} added to your cart from your previous order.`,
+        [{ text: 'View Menu', onPress: () => router.push('/menu') }]
+      );
+    } else {
+      router.push('/menu');
+    }
   }
 
   async function handleForwardReceipt(order: typeof orders[0]) {
@@ -108,7 +133,7 @@ export default function OrderHistoryScreen() {
                 <View style={styles.actionRow}>
                   <Pressable
                     style={styles.primaryButton}
-                    onPress={() => router.push('/menu')}
+                    onPress={() => handleOrderAgain(order)}
                   >
                     <Ionicons name="refresh" size={15} color="#FFF" />
                     <Text style={styles.primaryButtonText}>Order Again</Text>
