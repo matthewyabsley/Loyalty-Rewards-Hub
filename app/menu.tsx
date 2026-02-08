@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, ScrollView, Pressable, StyleSheet, Platform, Dimensions,
+  Modal, TextInput, KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -9,10 +10,12 @@ import { useData } from '@/lib/data-context';
 import Colors from '@/constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn, FadeInUp, ZoomIn } from 'react-native-reanimated';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 const { width } = Dimensions.get('window');
 const CATEGORIES = ['All', 'Starters', 'Mains', 'Desserts', 'Drinks'];
+const TABLE_NUMBERS = Array.from({ length: 20 }, (_, i) => i + 1);
 
 const CAT_ICONS: Record<string, { name: string; color: string }> = {
   All: { name: 'grid', color: Colors.text },
@@ -26,6 +29,11 @@ export default function MenuScreen() {
   const insets = useSafeAreaInsets();
   const { menu, cart, addToCart, cartTotal } = useData();
   const [activeCategory, setActiveCategory] = useState('All');
+  const [tableNumber, setTableNumber] = useState<number | null>(null);
+  const [showTableModal, setShowTableModal] = useState(true);
+  const [showScanner, setShowScanner] = useState(false);
+  const [manualInput, setManualInput] = useState('');
+  const [permission, requestPermission] = useCameraPermissions();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const filteredMenu = activeCategory === 'All' ? menu : menu.filter(item => item.category === activeCategory);
@@ -34,6 +42,51 @@ export default function MenuScreen() {
   async function handleAdd(item: any) {
     try { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
     addToCart(item);
+  }
+
+  function handleSelectTable(num: number) {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    setTableNumber(num);
+    setShowTableModal(false);
+  }
+
+  function handleManualSubmit() {
+    const num = parseInt(manualInput, 10);
+    if (num >= 1 && num <= 99) {
+      handleSelectTable(num);
+    }
+  }
+
+  function handleChangeTable() {
+    setShowTableModal(true);
+    setManualInput('');
+    setShowScanner(false);
+  }
+
+  async function handleOpenScanner() {
+    if (Platform.OS === 'web') {
+      setShowScanner(true);
+      return;
+    }
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      if (!result.granted) return;
+    }
+    setShowScanner(true);
+  }
+
+  function handleBarCodeScanned({ data }: { data: string }) {
+    const match = data.match(/table[:\s-]*(\d+)/i) || data.match(/^(\d+)$/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num >= 1 && num <= 99) {
+        setShowScanner(false);
+        handleSelectTable(num);
+        return;
+      }
+    }
+    setShowScanner(false);
+    handleSelectTable(parseInt(data, 10) || 1);
   }
 
   return (
@@ -52,6 +105,23 @@ export default function MenuScreen() {
           )}
         </Pressable>
       </View>
+
+      {tableNumber && (
+        <Pressable onPress={handleChangeTable} style={styles.tableBanner}>
+          <View style={styles.tableBannerLeft}>
+            <View style={styles.tableBannerIcon}>
+              <Ionicons name="tablet-landscape-outline" size={16} color={Colors.primary} />
+            </View>
+            <Text style={styles.tableBannerText}>
+              Table <Text style={styles.tableBannerNum}>{tableNumber}</Text>
+            </Text>
+          </View>
+          <View style={styles.tableBannerChange}>
+            <Text style={styles.tableBannerChangeText}>Change</Text>
+            <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
+          </View>
+        </Pressable>
+      )}
 
       <View style={styles.catBarWrap}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catContent}>
@@ -101,6 +171,138 @@ export default function MenuScreen() {
           </Pressable>
         </Animated.View>
       )}
+
+      <Modal
+        visible={showTableModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => { if (tableNumber) setShowTableModal(false); }}
+      >
+        <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalKeyboard}>
+            <Animated.View entering={FadeInUp.duration(400)} style={[styles.modalContent, { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 0) + 20 }]}>
+              {showScanner ? (
+                <View style={styles.scannerContainer}>
+                  <View style={styles.scannerHeader}>
+                    <Pressable onPress={() => setShowScanner(false)} style={styles.scannerBackBtn}>
+                      <Ionicons name="chevron-back" size={24} color={Colors.text} />
+                    </Pressable>
+                    <Text style={styles.scannerTitle}>Scan QR Code</Text>
+                    <View style={{ width: 40 }} />
+                  </View>
+
+                  {Platform.OS === 'web' ? (
+                    <View style={styles.scannerFallback}>
+                      <View style={styles.scannerFallbackIcon}>
+                        <Ionicons name="camera-outline" size={48} color={Colors.textSecondary} />
+                      </View>
+                      <Text style={styles.scannerFallbackTitle}>Camera not available</Text>
+                      <Text style={styles.scannerFallbackText}>Please enter your table number manually</Text>
+                      <Pressable onPress={() => setShowScanner(false)}>
+                        <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={styles.scannerFallbackBtn}>
+                          <Text style={styles.scannerFallbackBtnText}>Enter Manually</Text>
+                        </LinearGradient>
+                      </Pressable>
+                    </View>
+                  ) : (
+                    <View style={styles.cameraBox}>
+                      {permission?.granted ? (
+                        <CameraView
+                          style={styles.camera}
+                          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                          onBarcodeScanned={handleBarCodeScanned}
+                        >
+                          <View style={styles.scanOverlay}>
+                            <View style={styles.scanFrame}>
+                              <View style={[styles.scanCorner, styles.scanTL]} />
+                              <View style={[styles.scanCorner, styles.scanTR]} />
+                              <View style={[styles.scanCorner, styles.scanBL]} />
+                              <View style={[styles.scanCorner, styles.scanBR]} />
+                            </View>
+                            <Text style={styles.scanHint}>Point at the table QR code</Text>
+                          </View>
+                        </CameraView>
+                      ) : (
+                        <View style={styles.scannerFallback}>
+                          <Ionicons name="camera-outline" size={48} color={Colors.textSecondary} />
+                          <Text style={styles.scannerFallbackTitle}>Camera access needed</Text>
+                          <Pressable onPress={requestPermission}>
+                            <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={styles.scannerFallbackBtn}>
+                              <Text style={styles.scannerFallbackBtnText}>Allow Camera</Text>
+                            </LinearGradient>
+                          </Pressable>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              ) : (
+                <>
+                  <View style={styles.modalHandle} />
+                  <View style={styles.modalHeader}>
+                    <View style={styles.modalIconWrap}>
+                      <Ionicons name="tablet-landscape-outline" size={28} color={Colors.primary} />
+                    </View>
+                    <Text style={styles.modalTitle}>Select Your Table</Text>
+                    <Text style={styles.modalSubtitle}>Choose your table number or scan the QR code on your table</Text>
+                  </View>
+
+                  <View style={styles.inputRow}>
+                    <View style={styles.inputWrap}>
+                      <Ionicons name="keypad-outline" size={18} color={Colors.textSecondary} style={styles.inputIcon} />
+                      <TextInput
+                        style={styles.tableInput}
+                        placeholder="Enter table number"
+                        placeholderTextColor={Colors.textSecondary}
+                        keyboardType="number-pad"
+                        value={manualInput}
+                        onChangeText={setManualInput}
+                        maxLength={2}
+                        onSubmitEditing={handleManualSubmit}
+                        returnKeyType="done"
+                      />
+                      <Pressable
+                        onPress={handleOpenScanner}
+                        style={({ pressed }) => [styles.scanIconBtn, pressed && { opacity: 0.7 }]}
+                      >
+                        <Ionicons name="qr-code-outline" size={22} color="#FFF" />
+                      </Pressable>
+                    </View>
+                    {manualInput.length > 0 && (
+                      <Pressable
+                        onPress={handleManualSubmit}
+                        style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+                      >
+                        <LinearGradient colors={['#1A1A1A', '#2D2D2D']} style={styles.goBtn}>
+                          <Ionicons name="arrow-forward" size={20} color="#FFF" />
+                        </LinearGradient>
+                      </Pressable>
+                    )}
+                  </View>
+
+                  <View style={styles.dividerRow}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>or select below</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+
+                  <ScrollView showsVerticalScrollIndicator={false} style={styles.tableGridScroll} contentContainerStyle={styles.tableGrid}>
+                    {TABLE_NUMBERS.map(num => (
+                      <Pressable
+                        key={num}
+                        onPress={() => handleSelectTable(num)}
+                        style={({ pressed }) => [styles.tableCell, pressed && { transform: [{ scale: 0.92 }] }]}
+                      >
+                        <Text style={styles.tableCellNum}>{num}</Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </>
+              )}
+            </Animated.View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -154,6 +356,23 @@ const styles = StyleSheet.create({
   },
   cartDotText: { fontSize: 10, fontFamily: 'Poppins_700Bold', color: '#FFF' },
 
+  tableBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginHorizontal: 20, marginBottom: 8,
+    backgroundColor: Colors.primary + '0A', borderRadius: 14,
+    paddingHorizontal: 14, paddingVertical: 10,
+    borderWidth: 1, borderColor: Colors.primary + '18',
+  },
+  tableBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  tableBannerIcon: {
+    width: 32, height: 32, borderRadius: 10, backgroundColor: Colors.primary + '14',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  tableBannerText: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.text },
+  tableBannerNum: { fontFamily: 'Poppins_700Bold', color: Colors.primary, fontSize: 15 },
+  tableBannerChange: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  tableBannerChangeText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+
   catBarWrap: { height: 58, marginBottom: 4 },
   catContent: { paddingHorizontal: 20, gap: 8, alignItems: 'center', height: 58, paddingVertical: 8 },
   catChip: {
@@ -203,4 +422,105 @@ const styles = StyleSheet.create({
   cartCountText: { fontSize: 13, fontFamily: 'Poppins_700Bold', color: '#FFF' },
   cartBarLabel: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
   cartBarTotal: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
+  },
+  modalKeyboard: { justifyContent: 'flex-end' },
+  modalContent: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    paddingHorizontal: 24, paddingTop: 12,
+    maxHeight: '85%',
+  },
+  modalHandle: {
+    width: 40, height: 4, borderRadius: 2, backgroundColor: Colors.border,
+    alignSelf: 'center', marginBottom: 20,
+  },
+  modalHeader: { alignItems: 'center', marginBottom: 24 },
+  modalIconWrap: {
+    width: 60, height: 60, borderRadius: 20, backgroundColor: Colors.primary + '10',
+    justifyContent: 'center', alignItems: 'center', marginBottom: 14,
+  },
+  modalTitle: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 6 },
+  modalSubtitle: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+
+  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
+  inputWrap: {
+    flex: 1, flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#FFF', borderRadius: 16, paddingLeft: 14,
+    borderWidth: 1.5, borderColor: Colors.border, height: 54,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 1,
+  },
+  inputIcon: { marginRight: 10 },
+  tableInput: {
+    flex: 1, fontSize: 16, fontFamily: 'Poppins_500Medium', color: Colors.text,
+    height: 54, paddingRight: 8,
+  },
+  scanIconBtn: {
+    width: 42, height: 42, borderRadius: 14, backgroundColor: Colors.primary,
+    justifyContent: 'center', alignItems: 'center', marginRight: 5,
+  },
+  goBtn: {
+    width: 54, height: 54, borderRadius: 16, justifyContent: 'center', alignItems: 'center',
+  },
+
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18, gap: 12 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
+  dividerText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
+
+  tableGridScroll: { maxHeight: 260 },
+  tableGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 10,
+    justifyContent: 'center', paddingBottom: 10,
+  },
+  tableCell: {
+    width: (width - 48 - 40) / 5, height: (width - 48 - 40) / 5,
+    borderRadius: 16, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 1,
+    borderWidth: 1, borderColor: Colors.border + '80',
+  },
+  tableCellNum: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text },
+
+  scannerContainer: { minHeight: 400 },
+  scannerHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginBottom: 16, paddingTop: 8,
+  },
+  scannerBackBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+  scannerTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  cameraBox: { borderRadius: 20, overflow: 'hidden', height: 320 },
+  camera: { flex: 1 },
+  scanOverlay: {
+    flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  scanFrame: {
+    width: 200, height: 200, borderRadius: 20,
+    position: 'relative',
+  },
+  scanCorner: {
+    position: 'absolute', width: 40, height: 40,
+    borderColor: '#FFF', borderWidth: 3,
+  },
+  scanTL: { top: 0, left: 0, borderBottomWidth: 0, borderRightWidth: 0, borderTopLeftRadius: 20 },
+  scanTR: { top: 0, right: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderTopRightRadius: 20 },
+  scanBL: { bottom: 0, left: 0, borderTopWidth: 0, borderRightWidth: 0, borderBottomLeftRadius: 20 },
+  scanBR: { bottom: 0, right: 0, borderTopWidth: 0, borderLeftWidth: 0, borderBottomRightRadius: 20 },
+  scanHint: {
+    marginTop: 24, fontSize: 14, fontFamily: 'Poppins_500Medium', color: '#FFF',
+    textAlign: 'center',
+  },
+  scannerFallback: {
+    flex: 1, justifyContent: 'center', alignItems: 'center', gap: 14, paddingVertical: 40,
+  },
+  scannerFallbackIcon: {
+    width: 80, height: 80, borderRadius: 40, backgroundColor: Colors.surface,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  scannerFallbackTitle: { fontSize: 17, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  scannerFallbackText: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  scannerFallbackBtn: {
+    borderRadius: 14, paddingHorizontal: 28, paddingVertical: 14, marginTop: 4,
+  },
+  scannerFallbackBtnText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
 });
