@@ -13,7 +13,7 @@ import * as Haptics from 'expo-haptics';
 
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
-  const { cart, cartTotal, updateCartQuantity, clearCart, addTransaction } = useData();
+  const { cart, cartTotal, updateCartQuantity, clearCart, addTransaction, tableNumber } = useData();
   const { updatePoints } = useAuth();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
   const pointsToEarn = Math.floor(cartTotal);
@@ -30,7 +30,8 @@ export default function CartScreen() {
       type: 'earned',
     });
     clearCart();
-    Alert.alert('Order Placed!', `Sent to kitchen.\n\nYou earned ${pointsToEarn} points!`, [{ text: 'Done', onPress: () => router.back() }]);
+    const tableMsg = tableNumber ? `\nTable ${tableNumber}` : '';
+    Alert.alert('Order Placed!', `Sent to kitchen.${tableMsg}\n\nYou earned ${pointsToEarn} points!`, [{ text: 'Done', onPress: () => router.back() }]);
   }
 
   return (
@@ -46,6 +47,13 @@ export default function CartScreen() {
           </Pressable>
         ) : <View style={{ width: 40 }} />}
       </View>
+
+      {tableNumber && cart.length > 0 && (
+        <View style={styles.tablePill}>
+          <Ionicons name="tablet-landscape-outline" size={14} color={Colors.primary} />
+          <Text style={styles.tablePillText}>Table {tableNumber}</Text>
+        </View>
+      )}
 
       {cart.length === 0 ? (
         <View style={styles.emptyState}>
@@ -135,6 +143,16 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
   topTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   clearText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.error },
+
+  tablePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginHorizontal: 20, marginBottom: 10,
+    backgroundColor: Colors.primary + '0A', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 8,
+    borderWidth: 1, borderColor: Colors.primary + '18',
+    alignSelf: 'flex-start',
+  },
+  tablePillText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
 
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 14, paddingBottom: 80 },
   emptyIcon: {

@@ -63,6 +63,8 @@ interface DataContextValue {
   events: Event[];
   rewards: Reward[];
   transactions: PointsTransaction[];
+  tableNumber: number | null;
+  setTableNumber: (num: number | null) => void;
   addToCart: (item: MenuItem) => void;
   removeFromCart: (itemId: string) => void;
   updateCartQuantity: (itemId: string, qty: number) => void;
@@ -118,6 +120,7 @@ const SAMPLE_TRANSACTIONS: PointsTransaction[] = [
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [tableNumber, setTableNumber] = useState<number | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [events, setEvents] = useState<Event[]>(SAMPLE_EVENTS);
   const [rewards, setRewards] = useState<Reward[]>(SAMPLE_REWARDS);
@@ -219,6 +222,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     events,
     rewards,
     transactions,
+    tableNumber,
+    setTableNumber,
     addToCart,
     removeFromCart,
     updateCartQuantity,
@@ -229,7 +234,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     bookEvent,
     claimReward,
     addTransaction,
-  }), [cart, bookings, events, rewards, transactions, cartTotal]);
+  }), [cart, bookings, events, rewards, transactions, cartTotal, tableNumber]);
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }

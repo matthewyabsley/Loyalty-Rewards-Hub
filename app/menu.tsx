@@ -27,10 +27,9 @@ const CAT_ICONS: Record<string, { name: string; color: string }> = {
 
 export default function MenuScreen() {
   const insets = useSafeAreaInsets();
-  const { menu, cart, addToCart, cartTotal } = useData();
+  const { menu, cart, addToCart, cartTotal, tableNumber, setTableNumber } = useData();
   const [activeCategory, setActiveCategory] = useState('All');
-  const [tableNumber, setTableNumber] = useState<number | null>(null);
-  const [showTableModal, setShowTableModal] = useState(true);
+  const [showTableModal, setShowTableModal] = useState(tableNumber === null);
   const [showScanner, setShowScanner] = useState(false);
   const [manualInput, setManualInput] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
