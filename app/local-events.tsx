@@ -184,7 +184,7 @@ export default function LocalEventsScreen() {
                 <Animated.View key={event.id + '-' + ei} entering={FadeInDown.delay(Math.min(ei * 40, 300)).duration(400)}>
                   <View style={styles.eventCard}>
                     <View style={styles.eventTop}>
-                      <LinearGradient colors={cfg.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.eventDateBlock}>
+                      <LinearGradient colors={cfg.gradient as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.eventDateBlock}>
                         <Text style={styles.eventDay}>{eventDate.getDate()}</Text>
                         <Text style={styles.eventMonth}>{eventDate.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase()}</Text>
                       </LinearGradient>

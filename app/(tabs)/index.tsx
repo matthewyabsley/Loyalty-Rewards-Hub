@@ -118,6 +118,14 @@ export default function HomeScreen() {
               onPress={() => router.push('/(tabs)/rewards')}
               badge={unclaimedRewards}
             />
+            <ActionCard
+              icon="location"
+              iconPack="ionicons"
+              label="Local Events"
+              subtitle="Wilmslow"
+              gradient={['#1DB264', '#17904F']}
+              onPress={() => router.push('/local-events')}
+            />
           </View>
         </Animated.View>
 
