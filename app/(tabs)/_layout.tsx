@@ -15,6 +15,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "house", selected: "house.fill" }} />
         <Label>Home</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="bookings">
+        <Icon sf={{ default: "calendar", selected: "calendar.fill" }} />
+        <Label>Bookings</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="rewards">
         <Icon sf={{ default: "gift", selected: "gift.fill" }} />
         <Label>Rewards</Label>
@@ -46,7 +50,7 @@ function ClassicTabLayout() {
         tabBarInactiveTintColor: isDark ? '#555' : '#BFBBB5',
         tabBarLabelStyle: {
           fontFamily: 'Poppins_600SemiBold',
-          fontSize: 11,
+          fontSize: 10,
           letterSpacing: 0.2,
         },
         tabBarStyle: {
@@ -77,7 +81,16 @@ function ClassicTabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="bookings"
+        options={{
+          title: "Bookings",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "calendar" : "calendar-outline"} size={22} color={color} />
           ),
         }}
       />
@@ -86,7 +99,7 @@ function ClassicTabLayout() {
         options={{
           title: "Rewards",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "gift" : "gift-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "gift" : "gift-outline"} size={22} color={color} />
           ),
         }}
       />
@@ -95,7 +108,7 @@ function ClassicTabLayout() {
         options={{
           title: "Points",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "star" : "star-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "star" : "star-outline"} size={22} color={color} />
           ),
         }}
       />
@@ -104,7 +117,7 @@ function ClassicTabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
           ),
         }}
       />
