@@ -137,7 +137,7 @@ export default function LocalEventsScreen() {
 
   function handleBookAfter(event: LocalEvent) {
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
-    router.push('/book-table');
+    router.push({ pathname: '/book-table', params: { date: event.date } });
   }
 
   return (

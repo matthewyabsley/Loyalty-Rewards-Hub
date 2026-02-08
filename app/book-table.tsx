@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, Pressable, StyleSheet, Platform, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useData } from '@/lib/data-context';
 import { useAuth } from '@/lib/auth-context';
@@ -22,12 +22,14 @@ export default function BookTableScreen() {
   const insets = useSafeAreaInsets();
   const { addBooking } = useData();
   const { updatePoints } = useAuth();
+  const { date: preselectedDate } = useLocalSearchParams<{ date?: string }>();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [selectedDate, setSelectedDate] = useState('');
+  const initialDate = preselectedDate ? new Date(preselectedDate) : today;
+  const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth());
+  const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
+  const [selectedDate, setSelectedDate] = useState(preselectedDate || '');
   const [selectedTime, setSelectedTime] = useState('');
   const [selectedGuests, setSelectedGuests] = useState(2);
   const [isBooking, setIsBooking] = useState(false);
