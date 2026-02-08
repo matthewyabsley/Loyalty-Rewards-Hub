@@ -67,6 +67,43 @@ export interface PointsTransaction {
   type: 'earned' | 'spent';
 }
 
+export interface Order {
+  id: string;
+  items: { name: string; quantity: number; price: number; options?: string[] }[];
+  total: number;
+  date: string;
+  status: 'completed' | 'preparing' | 'delivered' | 'cancelled';
+  tableNumber: number;
+}
+
+export interface SavedItem {
+  id: string;
+  menuItemId: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  savedDate: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  type: 'visa' | 'mastercard' | 'amex' | 'apple_pay';
+  last4: string;
+  expiryDate: string;
+  isDefault: boolean;
+  cardholderName: string;
+}
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  read: boolean;
+  type: 'order' | 'reward' | 'promo' | 'booking' | 'system';
+}
+
 interface DataContextValue {
   menu: MenuItem[];
   cart: CartItem[];
@@ -74,6 +111,10 @@ interface DataContextValue {
   events: Event[];
   rewards: Reward[];
   transactions: PointsTransaction[];
+  orders: Order[];
+  savedItems: SavedItem[];
+  paymentMethods: PaymentMethod[];
+  notifications: AppNotification[];
   tableNumber: number | null;
   setTableNumber: (num: number | null) => void;
   addToCart: (item: MenuItem, options?: Record<string, { name: string; price: number }>, notes?: string) => void;
@@ -86,6 +127,13 @@ interface DataContextValue {
   bookEvent: (eventId: string) => Promise<void>;
   claimReward: (rewardId: string) => Promise<void>;
   addTransaction: (tx: Omit<PointsTransaction, 'id'>) => Promise<void>;
+  toggleSavedItem: (item: MenuItem) => Promise<void>;
+  addPaymentMethod: (method: Omit<PaymentMethod, 'id'>) => Promise<void>;
+  removePaymentMethod: (methodId: string) => Promise<void>;
+  setDefaultPayment: (methodId: string) => Promise<void>;
+  markNotificationRead: (notifId: string) => Promise<void>;
+  markAllNotificationsRead: () => Promise<void>;
+  placeOrder: (items: CartItem[], tableNum: number) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -285,6 +333,61 @@ const SAMPLE_TRANSACTIONS: PointsTransaction[] = [
   { id: '5', description: 'Referral Bonus', points: 75, date: '2026-01-15', type: 'earned' },
 ];
 
+const SAMPLE_ORDERS: Order[] = [
+  {
+    id: 'ord1', date: '2026-02-07T19:30:00', status: 'completed', tableNumber: 5, total: 72.47,
+    items: [
+      { name: 'Wagyu Burger', quantity: 1, price: 30.49, options: ['Medium Rare', 'Sweet Potato Fries'] },
+      { name: 'Truffle Risotto', quantity: 1, price: 28.99, options: ['Large'] },
+      { name: 'Espresso Martini', quantity: 1, price: 12.99, options: ['Classic'] },
+    ],
+  },
+  {
+    id: 'ord2', date: '2026-02-03T20:00:00', status: 'completed', tableNumber: 12, total: 48.97,
+    items: [
+      { name: 'Pan-Seared Salmon', quantity: 1, price: 26.99, options: ['Grilled Asparagus'] },
+      { name: 'Caesar Salad', quantity: 1, price: 12.99 },
+      { name: 'Craft Lemonade', quantity: 1, price: 5.99, options: ['Large'] },
+    ],
+  },
+  {
+    id: 'ord3', date: '2026-01-28T18:45:00', status: 'completed', tableNumber: 8, total: 58.97,
+    items: [
+      { name: 'Grilled Ribeye', quantity: 1, price: 34.99, options: ['Medium', 'Triple-Cooked Chips'] },
+      { name: 'Lobster Bisque', quantity: 1, price: 14.99, options: ['Regular'] },
+      { name: 'Chocolate Fondant', quantity: 1, price: 11.99, options: ['Vanilla Bean'] },
+    ],
+  },
+  {
+    id: 'ord4', date: '2026-01-20T13:00:00', status: 'completed', tableNumber: 3, total: 35.97,
+    items: [
+      { name: 'Caesar Salad', quantity: 2, price: 25.98, options: ['Grilled Chicken'] },
+      { name: 'Tiramisu', quantity: 1, price: 10.99 },
+    ],
+  },
+];
+
+const SAMPLE_SAVED: SavedItem[] = [
+  { id: 's1', menuItemId: '2', name: 'Wagyu Burger', description: 'Premium wagyu beef with caramelised onions and brioche bun', price: 28.99, category: 'Mains', savedDate: '2026-02-06' },
+  { id: 's2', menuItemId: '6', name: 'Chocolate Fondant', description: 'Warm molten centre with vanilla bean ice cream', price: 11.99, category: 'Desserts', savedDate: '2026-02-03' },
+  { id: 's3', menuItemId: '11', name: 'Espresso Martini', description: 'Vodka, fresh espresso, coffee liqueur', price: 12.99, category: 'Drinks', savedDate: '2026-01-28' },
+];
+
+const SAMPLE_PAYMENTS: PaymentMethod[] = [
+  { id: 'pm1', type: 'visa', last4: '4242', expiryDate: '08/27', isDefault: true, cardholderName: 'Guest User' },
+  { id: 'pm2', type: 'mastercard', last4: '8888', expiryDate: '12/26', isDefault: false, cardholderName: 'Guest User' },
+  { id: 'pm3', type: 'apple_pay', last4: '', expiryDate: '', isDefault: false, cardholderName: 'Guest User' },
+];
+
+const SAMPLE_NOTIFICATIONS: AppNotification[] = [
+  { id: 'n1', title: 'Order Confirmed', message: 'Your order at Table 5 has been confirmed and is being prepared.', date: '2026-02-08T10:30:00', read: false, type: 'order' },
+  { id: 'n2', title: 'New Reward Unlocked', message: 'You\'ve earned a 20% discount on your next visit. Check your rewards!', date: '2026-02-07T14:00:00', read: false, type: 'reward' },
+  { id: 'n3', title: 'Weekend Special', message: 'Join us this Saturday for our Chef\'s Table experience. Book now!', date: '2026-02-06T09:00:00', read: true, type: 'promo' },
+  { id: 'n4', title: 'Booking Reminder', message: 'Your table reservation for tomorrow at 7:30 PM is confirmed.', date: '2026-02-05T18:00:00', read: true, type: 'booking' },
+  { id: 'n5', title: 'Points Earned', message: 'You earned 50 points from your last visit. Keep dining to reach Silver tier!', date: '2026-02-01T20:00:00', read: true, type: 'reward' },
+  { id: 'n6', title: 'Happy Hour Tonight', message: '2-for-1 cocktails from 5-7 PM. See you at the bar!', date: '2026-01-30T12:00:00', read: true, type: 'promo' },
+];
+
 export function DataProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tableNumber, setTableNumber] = useState<number | null>(null);
@@ -292,6 +395,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<Event[]>(SAMPLE_EVENTS);
   const [rewards, setRewards] = useState<Reward[]>(SAMPLE_REWARDS);
   const [transactions, setTransactions] = useState<PointsTransaction[]>(SAMPLE_TRANSACTIONS);
+  const [orders, setOrders] = useState<Order[]>(SAMPLE_ORDERS);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>(SAMPLE_SAVED);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(SAMPLE_PAYMENTS);
+  const [notifications, setNotifications] = useState<AppNotification[]>(SAMPLE_NOTIFICATIONS);
 
   useEffect(() => {
     loadData();
@@ -299,14 +406,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   async function loadData() {
     try {
-      const [bookingsData, rewardsData, transactionsData] = await Promise.all([
+      const [bookingsData, rewardsData, transactionsData, ordersData, savedData, paymentsData, notifsData] = await Promise.all([
         AsyncStorage.getItem('bookings'),
         AsyncStorage.getItem('rewards'),
         AsyncStorage.getItem('transactions'),
+        AsyncStorage.getItem('orders'),
+        AsyncStorage.getItem('savedItems'),
+        AsyncStorage.getItem('paymentMethods'),
+        AsyncStorage.getItem('notifications'),
       ]);
       if (bookingsData) setBookings(JSON.parse(bookingsData));
       if (rewardsData) setRewards(JSON.parse(rewardsData));
       if (transactionsData) setTransactions(JSON.parse(transactionsData));
+      if (ordersData) setOrders(JSON.parse(ordersData));
+      if (savedData) setSavedItems(JSON.parse(savedData));
+      if (paymentsData) setPaymentMethods(JSON.parse(paymentsData));
+      if (notifsData) setNotifications(JSON.parse(notifsData));
     } catch (e) {
       console.error('Failed to load data', e);
     }
@@ -382,6 +497,86 @@ export function DataProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.setItem('transactions', JSON.stringify(updated));
   }
 
+  async function toggleSavedItem(item: MenuItem) {
+    const existing = savedItems.find(s => s.menuItemId === item.id);
+    let updated: SavedItem[];
+    if (existing) {
+      updated = savedItems.filter(s => s.menuItemId !== item.id);
+    } else {
+      const newSaved: SavedItem = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        menuItemId: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        category: item.category,
+        savedDate: new Date().toISOString().split('T')[0],
+      };
+      updated = [newSaved, ...savedItems];
+    }
+    setSavedItems(updated);
+    await AsyncStorage.setItem('savedItems', JSON.stringify(updated));
+  }
+
+  async function addPaymentMethod(method: Omit<PaymentMethod, 'id'>) {
+    const newMethod: PaymentMethod = {
+      ...method,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    };
+    const updated = [...paymentMethods, newMethod];
+    setPaymentMethods(updated);
+    await AsyncStorage.setItem('paymentMethods', JSON.stringify(updated));
+  }
+
+  async function removePaymentMethod(methodId: string) {
+    const updated = paymentMethods.filter(m => m.id !== methodId);
+    setPaymentMethods(updated);
+    await AsyncStorage.setItem('paymentMethods', JSON.stringify(updated));
+  }
+
+  async function setDefaultPayment(methodId: string) {
+    const updated = paymentMethods.map(m => ({ ...m, isDefault: m.id === methodId }));
+    setPaymentMethods(updated);
+    await AsyncStorage.setItem('paymentMethods', JSON.stringify(updated));
+  }
+
+  async function markNotificationRead(notifId: string) {
+    const updated = notifications.map(n => n.id === notifId ? { ...n, read: true } : n);
+    setNotifications(updated);
+    await AsyncStorage.setItem('notifications', JSON.stringify(updated));
+  }
+
+  async function markAllNotificationsRead() {
+    const updated = notifications.map(n => ({ ...n, read: true }));
+    setNotifications(updated);
+    await AsyncStorage.setItem('notifications', JSON.stringify(updated));
+  }
+
+  async function placeOrder(items: CartItem[], tableNum: number) {
+    const orderItems = items.map(ci => {
+      const optsList = ci.selectedOptions ? Object.values(ci.selectedOptions).map(o => o.name) : undefined;
+      const optionsPrice = ci.selectedOptions ? Object.values(ci.selectedOptions).reduce((s, o) => s + o.price, 0) : 0;
+      return {
+        name: ci.item.name,
+        quantity: ci.quantity,
+        price: (ci.item.price + optionsPrice) * ci.quantity,
+        options: optsList && optsList.length > 0 ? optsList : undefined,
+      };
+    });
+    const total = orderItems.reduce((s, oi) => s + oi.price, 0);
+    const newOrder: Order = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      items: orderItems,
+      total,
+      date: new Date().toISOString(),
+      status: 'preparing',
+      tableNumber: tableNum,
+    };
+    const updated = [newOrder, ...orders];
+    setOrders(updated);
+    await AsyncStorage.setItem('orders', JSON.stringify(updated));
+  }
+
   const value = useMemo(() => ({
     menu: SAMPLE_MENU,
     cart,
@@ -389,6 +584,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     events,
     rewards,
     transactions,
+    orders,
+    savedItems,
+    paymentMethods,
+    notifications,
     tableNumber,
     setTableNumber,
     addToCart,
@@ -401,7 +600,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     bookEvent,
     claimReward,
     addTransaction,
-  }), [cart, bookings, events, rewards, transactions, cartTotal, tableNumber]);
+    toggleSavedItem,
+    addPaymentMethod,
+    removePaymentMethod,
+    setDefaultPayment,
+    markNotificationRead,
+    markAllNotificationsRead,
+    placeOrder,
+  }), [cart, bookings, events, rewards, transactions, orders, savedItems, paymentMethods, notifications, cartTotal, tableNumber]);
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
