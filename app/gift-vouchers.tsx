@@ -39,6 +39,12 @@ export default function GiftVouchersScreen() {
   const [isPurchasing, setIsPurchasing] = useState(false);
 
   const defaultPayment = paymentMethods.find(m => m.isDefault);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+  const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
+
+  const activePayment = selectedPaymentId
+    ? paymentMethods.find(m => m.id === selectedPaymentId) || defaultPayment
+    : defaultPayment;
 
   function selectDenomination(amount: number) {
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
@@ -69,7 +75,7 @@ export default function GiftVouchersScreen() {
 
   function canPurchase() {
     if (!termsAccepted) return false;
-    if (!defaultPayment) return false;
+    if (!activePayment) return false;
     if (deliveryMethod === 'email') {
       if (!recipientName.trim() || !recipientContact.trim()) return false;
       if (!recipientContact.includes('@')) return false;
@@ -254,17 +260,61 @@ export default function GiftVouchersScreen() {
                 <View style={styles.paymentSection}>
                   <View style={styles.paymentRow}>
                     <Text style={styles.paymentLabel}>Payment</Text>
-                    {defaultPayment ? (
-                      <View style={styles.paymentMethod}>
-                        <Ionicons name={getCardIcon(defaultPayment.type) as any} size={18} color={Colors.text} />
-                        <Text style={styles.paymentMethodText}>{getCardLabel(defaultPayment)}</Text>
-                      </View>
+                    {activePayment ? (
+                      paymentMethods.length > 1 ? (
+                        <Pressable
+                          onPress={() => setPaymentDropdownOpen(!paymentDropdownOpen)}
+                          style={styles.paymentDropdownTrigger}
+                        >
+                          <Ionicons name={getCardIcon(activePayment.type) as any} size={18} color={Colors.text} />
+                          <Text style={styles.paymentMethodText}>{getCardLabel(activePayment)}</Text>
+                          <Ionicons name={paymentDropdownOpen ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.textSecondary} />
+                        </Pressable>
+                      ) : (
+                        <View style={styles.paymentMethod}>
+                          <Ionicons name={getCardIcon(activePayment.type) as any} size={18} color={Colors.text} />
+                          <Text style={styles.paymentMethodText}>{getCardLabel(activePayment)}</Text>
+                        </View>
+                      )
                     ) : (
                       <Pressable onPress={() => { setModalVisible(false); router.push('/payment-methods'); }}>
                         <Text style={styles.addPaymentText}>Add payment method</Text>
                       </Pressable>
                     )}
                   </View>
+                  {paymentDropdownOpen && paymentMethods.length > 1 && (
+                    <View style={styles.paymentDropdown}>
+                      {paymentMethods.map(method => (
+                        <Pressable
+                          key={method.id}
+                          onPress={() => {
+                            setSelectedPaymentId(method.id);
+                            setPaymentDropdownOpen(false);
+                          }}
+                          style={[
+                            styles.paymentDropdownItem,
+                            method.id === (activePayment?.id) && styles.paymentDropdownItemActive,
+                          ]}
+                        >
+                          <Ionicons name={getCardIcon(method.type) as any} size={16} color={method.id === activePayment?.id ? Colors.primary : Colors.text} />
+                          <Text style={[
+                            styles.paymentDropdownText,
+                            method.id === activePayment?.id && { color: Colors.primary },
+                          ]}>{getCardLabel(method)}</Text>
+                          {method.id === activePayment?.id && (
+                            <Ionicons name="checkmark-circle" size={18} color={Colors.primary} />
+                          )}
+                        </Pressable>
+                      ))}
+                    </View>
+                  )}
+                  <Pressable
+                    onPress={() => { setModalVisible(false); router.push('/payment-methods'); }}
+                    style={styles.managePaymentLink}
+                  >
+                    <Ionicons name="settings-outline" size={14} color={Colors.primary} />
+                    <Text style={styles.managePaymentText}>Manage payment methods</Text>
+                  </Pressable>
                 </View>
 
                 <Pressable
@@ -406,8 +456,23 @@ const styles = StyleSheet.create({
   paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   paymentLabel: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   paymentMethod: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  paymentDropdownTrigger: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   paymentMethodText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   addPaymentText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  paymentDropdown: {
+    marginTop: 12, borderTopWidth: 1, borderTopColor: Colors.border, paddingTop: 8,
+  },
+  paymentDropdownItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, paddingHorizontal: 4,
+    borderRadius: 10,
+  },
+  paymentDropdownItemActive: { backgroundColor: Colors.primary + '08' },
+  paymentDropdownText: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.text, flex: 1 },
+  managePaymentLink: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12,
+    borderTopWidth: 1, borderTopColor: Colors.border, paddingTop: 12,
+  },
+  managePaymentText: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.primary },
 
   purchaseBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
