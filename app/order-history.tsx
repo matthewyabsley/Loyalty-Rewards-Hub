@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Share, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -7,6 +7,8 @@ import { useData, Order } from '@/lib/data-context';
 import Colors from '@/constants/colors';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 
 const STATUS_CONFIG = {
   completed: { color: Colors.success, icon: 'checkmark-circle' as const, label: 'Completed' },
@@ -54,16 +56,67 @@ export default function OrderHistoryScreen() {
     }
   }
 
-  async function handleForwardReceipt(order: typeof orders[0]) {
-    const itemsText = order.items
-      .map((item) => `- ${item.quantity}x ${item.name} - £${item.price.toFixed(2)}`)
-      .join('\n');
-
-    const receiptText = `Dine & Earn Receipt\nDate: ${formatDate(order.date)}\nTable: ${order.tableNumber}\n\nItems:\n${itemsText}\n\nTotal: £${order.total.toFixed(2)}`;
-
+  async function handleViewReceipt(order: typeof orders[0]) {
     try {
-      await Share.share({ message: receiptText });
-    } catch (_) {}
+      const itemsHtml = order.items
+        .map((item) => `
+          <tr>
+            <td style="padding:8px 0;border-bottom:1px solid #eee;">${item.quantity}x ${item.name}${item.options && item.options.length > 0 ? `<br/><span style="color:#888;font-size:12px;">${item.options.join(' · ')}</span>` : ''}</td>
+            <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;">£${item.price.toFixed(2)}</td>
+          </tr>`)
+        .join('');
+
+      const html = `
+        <html>
+          <head><meta charset="utf-8"/><style>
+            body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 40px 30px; color: #1A1A1A; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .header h1 { font-size: 22px; margin: 0 0 4px; }
+            .header p { color: #888; font-size: 13px; margin: 2px 0; }
+            .divider { border-top: 2px solid #1A1A1A; margin: 20px 0; }
+            table { width: 100%; border-collapse: collapse; font-size: 14px; }
+            .total-row td { padding-top: 14px; font-weight: 700; font-size: 16px; border-bottom: none; }
+            .footer { text-align: center; margin-top: 30px; color: #888; font-size: 11px; }
+          </style></head>
+          <body>
+            <div class="header">
+              <h1>Dine & Earn</h1>
+              <p>Receipt</p>
+            </div>
+            <div class="divider"></div>
+            <p style="font-size:13px;color:#555;">
+              <strong>Date:</strong> ${formatDate(order.date)} at ${formatTime(order.date)}<br/>
+              <strong>Table:</strong> ${order.tableNumber}<br/>
+              <strong>Order:</strong> #${order.id.slice(-6).toUpperCase()}
+            </p>
+            <div class="divider"></div>
+            <table>
+              ${itemsHtml}
+              <tr class="total-row">
+                <td>Total</td>
+                <td style="text-align:right;">£${order.total.toFixed(2)}</td>
+              </tr>
+            </table>
+            <div class="footer">
+              <p>Thank you for dining with us!</p>
+            </div>
+          </body>
+        </html>`;
+
+      const { uri } = await Print.printToFileAsync({ html });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'Receipt',
+          UTI: 'com.adobe.pdf',
+        });
+      } else {
+        Alert.alert('Receipt saved', 'Your receipt PDF has been generated.');
+      }
+    } catch (_) {
+      Alert.alert('Error', 'Could not generate receipt. Please try again.');
+    }
   }
 
   return (
@@ -140,10 +193,10 @@ export default function OrderHistoryScreen() {
                   </Pressable>
                   <Pressable
                     style={styles.secondaryButton}
-                    onPress={() => handleForwardReceipt(order)}
+                    onPress={() => handleViewReceipt(order)}
                   >
-                    <Ionicons name="mail-outline" size={15} color={Colors.primary} />
-                    <Text style={styles.secondaryButtonText}>Forward Receipt</Text>
+                    <Ionicons name="document-text-outline" size={15} color={Colors.primary} />
+                    <Text style={styles.secondaryButtonText}>Receipt</Text>
                   </Pressable>
                 </View>
               </Animated.View>
