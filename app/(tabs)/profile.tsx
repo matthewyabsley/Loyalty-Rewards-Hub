@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, Pressable, StyleSheet, Platform, Alert,
+  View, Text, ScrollView, Pressable, StyleSheet, Platform, TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,13 +17,6 @@ export default function ProfileScreen() {
   const { notifications } = useData();
   const unreadCount = notifications.filter(n => !n.read).length;
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
-
-  async function handleSignOut() {
-    try {
-      await signOut();
-    } catch {}
-    router.replace('/');
-  }
 
   const menuGroups = [
     [
@@ -113,21 +106,17 @@ export default function ProfileScreen() {
           </Animated.View>
         ))}
 
-        <View>
-          <Pressable
-            style={({ pressed }) => [styles.signOutBtn, pressed && { opacity: 0.8 }]}
-            onPress={() => {
-              signOut().then(() => {
-                router.replace('/');
-              }).catch(() => {
-                router.replace('/');
-              });
-            }}
-          >
-            <Ionicons name="log-out-outline" size={20} color={Colors.error} />
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </Pressable>
-        </View>
+        <TouchableOpacity
+          activeOpacity={0.6}
+          style={styles.signOutBtn}
+          onPress={() => {
+            signOut();
+            router.replace('/');
+          }}
+        >
+          <Ionicons name="log-out-outline" size={20} color={Colors.error} />
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

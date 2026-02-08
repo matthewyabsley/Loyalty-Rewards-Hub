@@ -17,7 +17,7 @@ interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   signIn: (provider: string, name: string, email: string) => Promise<void>;
-  signOut: () => Promise<void>;
+  signOut: () => void;
   updatePoints: (points: number) => Promise<void>;
   spendCredits: (amount: number) => Promise<void>;
 }
@@ -68,9 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser);
   }
 
-  async function signOut() {
-    await AsyncStorage.removeItem('user');
+  function signOut() {
     setUser(null);
+    AsyncStorage.removeItem('user').catch(() => {});
   }
 
   async function updatePoints(points: number) {
