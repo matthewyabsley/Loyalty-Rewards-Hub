@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuth } from '@/lib/auth-context';
+import { useData } from '@/lib/data-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -13,6 +14,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
+  const { notifications } = useData();
+  const unreadCount = notifications.filter(n => !n.read).length;
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   function handleSignOut() {
@@ -28,14 +31,14 @@ export default function ProfileScreen() {
 
   const menuGroups = [
     [
-      { icon: 'receipt-outline', label: 'Order History' },
-      { icon: 'bookmark-outline', label: 'Saved Items' },
-      { icon: 'card-outline', label: 'Payment Methods' },
+      { icon: 'receipt-outline', label: 'Order History', route: '/order-history' },
+      { icon: 'bookmark-outline', label: 'Saved Items', route: '/saved-items' },
+      { icon: 'card-outline', label: 'Payment Methods', route: '/payment-methods' },
     ],
     [
-      { icon: 'notifications-outline', label: 'Notifications' },
-      { icon: 'help-circle-outline', label: 'Help & Support' },
-      { icon: 'document-text-outline', label: 'Terms & Privacy' },
+      { icon: 'notifications-outline', label: 'Notifications', route: '/notifications' },
+      { icon: 'help-circle-outline', label: 'Help & Support', route: '/help-support' },
+      { icon: 'document-text-outline', label: 'Terms & Privacy', route: '/terms-privacy' },
     ],
   ];
 
@@ -97,12 +100,17 @@ export default function ProfileScreen() {
                   i < group.length - 1 && styles.menuRowBorder,
                   pressed && { backgroundColor: Colors.surface },
                 ]}
-                onPress={() => {}}
+                onPress={() => router.push(item.route as any)}
               >
                 <View style={styles.menuIconWrap}>
                   <Ionicons name={item.icon as any} size={20} color={Colors.text} />
                 </View>
                 <Text style={styles.menuLabel}>{item.label}</Text>
+                {item.label === 'Notifications' && unreadCount > 0 && (
+                  <View style={styles.notifBadge}>
+                    <Text style={styles.notifBadgeText}>{unreadCount}</Text>
+                  </View>
+                )}
                 <Ionicons name="chevron-forward" size={17} color={Colors.border} />
               </Pressable>
             ))}
@@ -165,6 +173,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', marginRight: 14,
   },
   menuLabel: { flex: 1, fontSize: 15, fontFamily: 'Poppins_500Medium', color: Colors.text },
+  notifBadge: {
+    minWidth: 20, height: 20, borderRadius: 10, backgroundColor: Colors.primary,
+    justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6, marginRight: 8,
+  },
+  notifBadgeText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
 
   signOutBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

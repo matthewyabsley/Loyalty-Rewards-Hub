@@ -22,6 +22,12 @@ function RootLayoutNav() {
       <Stack.Screen name="events" options={{ headerShown: false }} />
       <Stack.Screen name="event-detail" options={{ headerShown: false }} />
       <Stack.Screen name="cart" options={{ presentation: 'modal', headerShown: false }} />
+      <Stack.Screen name="order-history" options={{ headerShown: false }} />
+      <Stack.Screen name="saved-items" options={{ headerShown: false }} />
+      <Stack.Screen name="payment-methods" options={{ headerShown: false }} />
+      <Stack.Screen name="notifications" options={{ headerShown: false }} />
+      <Stack.Screen name="help-support" options={{ headerShown: false }} />
+      <Stack.Screen name="terms-privacy" options={{ headerShown: false }} />
     </Stack>
   );
 }
