@@ -2,6 +2,10 @@ import React, { useState, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { Gift, Clock, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const typeGradients: Record<string, string> = {
   discount: 'linear-gradient(135deg, #E8735A, #D45A42)',
@@ -26,9 +30,11 @@ export default function Rewards() {
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
-    const cardWidth = el.scrollWidth / rewards.length;
+    const children = el.children;
+    if (children.length === 0) return;
+    const cardWidth = (children[0] as HTMLElement).offsetWidth + 16;
     const idx = Math.round(el.scrollLeft / cardWidth);
-    setActiveIndex(Math.min(idx, rewards.length - 1));
+    setActiveIndex(Math.min(Math.max(idx, 0), activeRewards.length - 1));
   };
 
   if (rewards.length === 0) {
@@ -37,8 +43,10 @@ export default function Rewards() {
         <div className="px-5 pt-6 pb-2">
           <h1 className="text-2xl font-bold text-text-main">Rewards</h1>
         </div>
-        <div className="flex flex-col items-center justify-center py-20 gap-4 text-text-secondary">
-          <Gift size={48} strokeWidth={1.5} />
+        <div className="flex flex-col items-center justify-center py-20 gap-4 text-text-secondary animate-fade-in-up">
+          <div className="w-16 h-16 rounded-2xl bg-surface flex items-center justify-center">
+            <Gift size={32} strokeWidth={1.5} className="text-text-muted" />
+          </div>
           <p className="text-sm text-center px-8">No rewards available yet. Keep dining to earn rewards!</p>
         </div>
       </div>
@@ -47,50 +55,47 @@ export default function Rewards() {
 
   return (
     <div className="pb-5">
-      <div className="px-5 pt-6 pb-4">
+      <div className="px-5 pt-6 pb-4 animate-fade-in-up">
         <h1 className="text-2xl font-bold text-text-main">Rewards</h1>
         <p className="text-sm text-text-secondary mt-1">
-          {activeRewards.length} reward{activeRewards.length !== 1 ? 's' : ''} available
+          {activeRewards.length} active reward{activeRewards.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-7 pb-4 hide-scrollbar"
-        style={{ scrollPaddingLeft: 28 }}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-6 pb-4 hide-scrollbar animate-fade-in-up stagger-1"
+        style={{ scrollPaddingLeft: 24 }}
       >
-        {rewards.filter(r => !r.claimed).map((reward) => (
-          <div
+        {activeRewards.map((reward) => (
+          <Card
             key={reward.id}
-            className="snap-center shrink-0 rounded-3xl shadow-lg bg-card overflow-hidden"
-            style={{ width: 'calc(100% - 56px)', minWidth: 'calc(100% - 56px)' }}
+            className="snap-center shrink-0 overflow-hidden border-0 shadow-lg"
+            style={{ width: 'calc(100% - 48px)', minWidth: 'calc(100% - 48px)' }}
           >
             <div
-              className="p-5 pb-6 text-white relative"
+              className="p-6 text-white relative"
               style={{ background: typeGradients[reward.type] || typeGradients.discount }}
             >
-              <div className="flex justify-between items-start mb-3">
-                <span
-                  className="text-[11px] font-semibold uppercase px-3 py-1 rounded-full"
-                  style={{ background: 'rgba(255,255,255,0.25)' }}
-                >
-                  {reward.type}
-                </span>
-                <span className="text-[26px] font-bold leading-none">{reward.value}</span>
-              </div>
-              <h2 className="text-[17px] font-bold mb-1">{reward.title}</h2>
-              <p className="text-[13px] opacity-80">{reward.description}</p>
+              <Badge
+                className="mb-3 bg-white/20 border-0 text-white text-[11px]"
+              >
+                {reward.type}
+              </Badge>
+              <div className="text-3xl font-bold mb-1">{reward.value}</div>
+              <h2 className="text-lg font-semibold mb-1">{reward.title}</h2>
+              <p className="text-sm text-white/80">{reward.description}</p>
             </div>
 
-            <div className="p-5 flex flex-col items-center">
-              <div className="bg-white rounded-xl p-3 shadow-sm mb-3">
-                <QRCodeSVG value={reward.code} size={100} />
+            <div className="p-6 flex flex-col items-center">
+              <div className="bg-surface rounded-2xl p-4 mb-3">
+                <QRCodeSVG value={reward.code} size={110} />
               </div>
-              <p className="text-[11px] tracking-[2px] font-semibold text-text-secondary mb-2">
+              <p className="text-[11px] tracking-[1.5px] text-text-muted font-semibold mb-2 uppercase">
                 {reward.code}
               </p>
-              <div className="flex items-center gap-1.5 text-[12px] text-text-secondary mb-4">
+              <div className="flex items-center gap-1.5 text-xs text-text-muted mb-4">
                 <Clock size={13} />
                 <span>
                   Expires{' '}
@@ -101,15 +106,16 @@ export default function Rewards() {
                   })}
                 </span>
               </div>
-              <button
+              <Button
+                variant="dark"
+                className="w-full"
                 onClick={() => claimReward(reward.id)}
-                className="w-full py-3 rounded-xl text-[14px] font-semibold text-white transition-transform active:scale-[0.97]"
-                style={{ background: '#1A1A1A' }}
               >
+                <Gift size={16} />
                 Claim Reward
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -118,24 +124,23 @@ export default function Rewards() {
           {activeRewards.map((_, i) => (
             <div
               key={i}
-              className="h-2 rounded-full transition-all duration-200"
-              style={{
-                width: i === activeIndex ? 28 : 8,
-                background: i === activeIndex ? '#8B1A2B' : '#E5E2DC',
-              }}
+              className={cn(
+                "h-2 rounded-full transition-all duration-300",
+                i === activeIndex ? "w-7 bg-primary" : "w-2 bg-border"
+              )}
             />
           ))}
         </div>
       )}
 
       {claimedRewards.length > 0 && (
-        <div className="px-5 mt-4">
+        <div className="px-5 mt-4 animate-fade-in-up stagger-2">
           <h2 className="text-[15px] font-semibold text-text-secondary mb-3">Claimed Rewards</h2>
           <div className="flex flex-col gap-3">
             {claimedRewards.map((reward) => (
-              <div
+              <Card
                 key={reward.id}
-                className="bg-card rounded-2xl p-4 flex items-center gap-3.5 shadow-sm"
+                className="p-4 flex items-center gap-3.5"
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -144,21 +149,22 @@ export default function Rewards() {
                   <Check size={18} style={{ color: typeColors[reward.type] }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-semibold text-text-main truncate">{reward.title}</p>
-                  <p className="text-[12px] text-text-secondary">
+                  <p className="text-sm font-semibold text-text-main truncate">{reward.title}</p>
+                  <p className="text-xs text-text-secondary">
                     {reward.value} &middot; Claimed
                   </p>
                 </div>
-                <span
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-full shrink-0"
+                <Badge
+                  className="shrink-0 text-[11px]"
                   style={{
                     background: `${typeColors[reward.type]}12`,
                     color: typeColors[reward.type],
+                    border: 'none',
                   }}
                 >
                   {reward.type}
-                </span>
-              </div>
+                </Badge>
+              </Card>
             ))}
           </div>
         </div>

@@ -1,7 +1,10 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
-import { Shield, TrendingUp, TrendingDown, Award, Calendar, Star, Gift } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Card, DarkCard } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Shield, TrendingUp, TrendingDown, Calendar, Star, Gift, Diamond } from 'lucide-react';
 
 const TIERS = [
   { name: 'Bronze', min: 0, max: 499, color: '#CD7F32' },
@@ -37,40 +40,30 @@ export default function Points() {
         <h1 className="text-2xl font-bold text-text-main">Points</h1>
       </div>
 
-      <div className="px-5 mb-5">
-        <div
-          className="rounded-[22px] p-[22px]"
-          style={{ background: 'linear-gradient(135deg, #1A1A1A, #2D2D2D)' }}
-        >
-          <div className="flex flex-col items-center mb-5">
+      <div className="px-5 mb-5 animate-fade-in-up">
+        <DarkCard className="p-6">
+          <div className="flex items-center gap-4 mb-5">
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mb-3"
-              style={{ backgroundColor: `${tier.color}20` }}
+              className="w-14 h-14 rounded-2xl border-2 flex items-center justify-center"
+              style={{ borderColor: tier.color, backgroundColor: `${tier.color}15` }}
             >
-              <Shield size={28} color={tier.color} />
+              <Diamond size={24} color={tier.color} />
             </div>
-            <span
-              className="text-sm font-semibold tracking-wide mb-1"
-              style={{ color: tier.color }}
-            >
-              {tier.name} Member
-            </span>
-            <p className="text-[38px] font-bold text-white leading-none">{points}</p>
-            <p className="text-[11px] tracking-[1.5px] text-white/45 mt-1 uppercase">total points</p>
+            <div>
+              <p className="text-lg font-semibold text-white">{tier.name}</p>
+              <p className="text-[11px] tracking-[1.5px] text-white/40 uppercase">Member</p>
+            </div>
+          </div>
+
+          <div className="text-center mb-5">
+            <p className="text-4xl font-bold text-white">{points.toLocaleString()}</p>
+            <p className="text-[11px] tracking-[1.5px] text-white/40 mt-1 uppercase">total points</p>
           </div>
 
           <div className="mb-2">
-            <div className="flex justify-between text-xs text-white/60 mb-2">
-              <span>{tier.name}</span>
-              <span>
-                {nextTier
-                  ? `${tier.max - points + 1} pts to ${nextTier.name}`
-                  : 'Max tier reached'}
-              </span>
-            </div>
             <div className="h-2 rounded-full bg-white/10 overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${progress}%`,
                   background: nextTier
@@ -79,52 +72,52 @@ export default function Points() {
                 }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-white/40 mt-1.5">
-              <span>{tier.min} pts</span>
-              <span>{tier.max} pts</span>
+            <div className="flex justify-between mt-2">
+              <span className="text-[11px] text-white/35">{tier.name}</span>
+              <span className="text-[11px] text-accent font-semibold">
+                {nextTier
+                  ? `${tier.max - points + 1} pts to ${nextTier.name}`
+                  : 'Max tier reached'}
+              </span>
             </div>
           </div>
-        </div>
+        </DarkCard>
       </div>
 
-      <div className="px-5 mb-5">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-card rounded-2xl p-4 border border-border text-center">
-            <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-blue-500/10">
-              <Calendar size={18} className="text-blue-500" />
-            </div>
-            <p className="text-xs text-text-secondary mb-0.5">This Month</p>
-            <p className="text-xl font-bold text-text-main">{thisMonth}</p>
+      <div className="px-5 mb-5 flex gap-3 animate-fade-in-up stagger-2">
+        <Card className="flex-1 p-4 text-center">
+          <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-blue-500/10">
+            <Calendar size={18} className="text-blue-500" />
           </div>
-          <div className="bg-card rounded-2xl p-4 border border-border text-center">
-            <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-success/10">
-              <Star size={18} className="text-success" />
-            </div>
-            <p className="text-xs text-text-secondary mb-0.5">Lifetime</p>
-            <p className="text-xl font-bold text-text-main">{lifetime}</p>
+          <p className="text-lg font-bold text-text-main">{thisMonth}</p>
+          <p className="text-xs text-text-muted">This Month</p>
+        </Card>
+        <Card className="flex-1 p-4 text-center">
+          <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-success/10">
+            <Star size={18} className="text-success" />
           </div>
-          <div className="bg-card rounded-2xl p-4 border border-border text-center">
-            <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-error/10">
-              <Gift size={18} className="text-error" />
-            </div>
-            <p className="text-xs text-text-secondary mb-0.5">Redeemed</p>
-            <p className="text-xl font-bold text-text-main">{redeemed}</p>
+          <p className="text-lg font-bold text-text-main">{lifetime}</p>
+          <p className="text-xs text-text-muted">Lifetime</p>
+        </Card>
+        <Card className="flex-1 p-4 text-center">
+          <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-error/10">
+            <Gift size={18} className="text-error" />
           </div>
-        </div>
+          <p className="text-lg font-bold text-text-main">{redeemed}</p>
+          <p className="text-xs text-text-muted">Redeemed</p>
+        </Card>
       </div>
 
-      <div className="px-5 mb-5">
+      <div className="px-5 mb-5 animate-fade-in-up stagger-3">
         <h2 className="text-base font-semibold text-text-main mb-3">Transaction History</h2>
-        <div className="bg-card rounded-[18px] border border-border overflow-hidden">
+        <Card className="divide-y divide-border overflow-hidden">
           {transactions.length === 0 ? (
             <p className="text-sm text-text-secondary text-center py-8">No transactions yet</p>
           ) : (
-            transactions.map((tx, i) => (
+            transactions.map((tx) => (
               <div
                 key={tx.id}
-                className={`flex items-center justify-between px-4 py-3 ${
-                  i < transactions.length - 1 ? 'border-b border-border' : ''
-                }`}
+                className="flex items-center justify-between px-4 py-3"
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -150,9 +143,10 @@ export default function Points() {
                   </div>
                 </div>
                 <span
-                  className={`text-[15px] font-semibold ${
+                  className={cn(
+                    "text-[15px] font-semibold",
                     tx.type === 'earned' ? 'text-success' : 'text-error'
-                  }`}
+                  )}
                 >
                   {tx.type === 'earned' ? '+' : ''}
                   {tx.points}
@@ -160,39 +154,38 @@ export default function Points() {
               </div>
             ))
           )}
-        </div>
+        </Card>
       </div>
 
-      <div className="px-5 pb-4">
+      <div className="px-5 pb-4 animate-fade-in-up stagger-4">
         <h2 className="text-base font-semibold text-text-main mb-3">Tier Levels</h2>
-        <div className="bg-card rounded-[18px] border border-border overflow-hidden">
-          {TIERS.map((t, i) => (
+        <Card className="divide-y divide-border overflow-hidden">
+          {TIERS.map((t) => (
             <div
               key={t.name}
-              className={`flex items-center gap-3 px-4 py-3.5 ${
-                i < TIERS.length - 1 ? 'border-b border-border' : ''
-              } ${t.name === tier.name ? 'bg-surface' : ''}`}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3.5",
+                t.name === tier.name && 'bg-surface'
+              )}
             >
               <div
                 className="w-3 h-3 rounded-full shrink-0"
                 style={{ backgroundColor: t.color }}
               />
               <div className="flex-1">
-                <p className="text-sm font-medium text-text-main">{t.name}</p>
-                <p className="text-[11px] text-text-secondary">
+                <p className="text-sm font-semibold text-text-main">{t.name}</p>
+                <p className="text-xs text-text-muted">
                   {t.name === 'Platinum'
                     ? `${t.min.toLocaleString()}+ points`
                     : `${t.min.toLocaleString()} - ${t.max.toLocaleString()} points`}
                 </p>
               </div>
               {t.name === tier.name && (
-                <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-                  Current
-                </span>
+                <Badge variant="default">Current</Badge>
               )}
             </div>
           ))}
-        </div>
+        </Card>
       </div>
     </div>
   );

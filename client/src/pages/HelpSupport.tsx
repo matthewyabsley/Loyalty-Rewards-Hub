@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Phone, Mail, MessageCircle, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, ChevronDown, Phone, Mail, MessageCircle, Send, Check } from 'lucide-react';
 
 const FAQS = [
   { q: 'How do I earn loyalty points?', a: 'You earn points every time you dine with us. For every £1 spent, you earn 1 loyalty point. Points are automatically added to your account after payment.' },
@@ -26,45 +30,54 @@ export default function HelpSupport() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
-        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 rounded-full bg-surface">
-          <ArrowLeft size={22} className="text-text-main" />
-        </button>
-        <h1 className="text-xl font-bold text-text-main">Help & Support</h1>
+      <div className="sticky top-0 z-30 glass border-b border-white/20 shadow-sm">
+        <div className="flex items-center gap-3 px-5 pt-[67px] pb-3 max-w-[480px] mx-auto">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft size={22} />
+          </Button>
+          <h1 className="text-lg font-semibold text-text-main">Help & Support</h1>
+        </div>
       </div>
 
-      <div className="p-5">
-        <h2 className="text-base font-semibold text-text-main mb-3">FAQ</h2>
-        <div className="flex flex-col gap-2 mb-6">
+      <div className="flex-1 max-w-[480px] mx-auto w-full overflow-y-auto p-5" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <h2 className="text-base font-semibold text-text-main mb-3">Frequently Asked Questions</h2>
+        <Card className="divide-y divide-border mb-6 overflow-hidden animate-fade-in-up stagger-1">
           {FAQS.map((faq, i) => (
-            <div key={i} className="bg-card rounded-[14px] border border-border overflow-hidden">
+            <div key={i}>
               <button
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 className="flex justify-between items-center w-full px-4 py-3.5 bg-transparent text-left"
               >
-                <span className="text-sm font-medium text-text-main flex-1 pr-2">{faq.q}</span>
-                {openFaq === i ? (
-                  <ChevronUp size={18} className="text-text-secondary shrink-0" />
-                ) : (
-                  <ChevronDown size={18} className="text-text-secondary shrink-0" />
-                )}
+                <span className="text-sm font-medium text-text-main flex-1 pr-3">{faq.q}</span>
+                <ChevronDown
+                  size={18}
+                  className={cn(
+                    "text-text-secondary shrink-0 transition-transform duration-300",
+                    openFaq === i && "rotate-180"
+                  )}
+                />
               </button>
-              {openFaq === i && (
+              <div
+                className={cn(
+                  "overflow-hidden transition-all duration-300",
+                  openFaq === i ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                )}
+              >
                 <div className="px-4 pb-3.5 text-[13px] text-text-secondary leading-[1.6]">
                   {faq.a}
                 </div>
-              )}
+              </div>
             </div>
           ))}
-        </div>
+        </Card>
 
         <h2 className="text-base font-semibold text-text-main mb-3">Contact Us</h2>
-        <div className="flex flex-col gap-2.5 mb-6">
+        <Card className="divide-y divide-border mb-6 overflow-hidden animate-fade-in-up stagger-2">
           {[
             { icon: Phone, label: 'Call Us', detail: '01625 000 000' },
             { icon: Mail, label: 'Email', detail: 'hello@tapyard.co.uk' },
           ].map((c, i) => (
-            <div key={i} className="flex items-center gap-3 bg-card rounded-xl p-3.5 border border-border">
+            <div key={i} className="flex items-center gap-3 p-4">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <c.icon size={20} className="text-primary" />
               </div>
@@ -74,35 +87,40 @@ export default function HelpSupport() {
               </div>
             </div>
           ))}
-        </div>
+        </Card>
 
-        <button
+        <Button
+          variant="outline"
+          className="w-full gap-2 mb-4 animate-fade-in-up stagger-3"
           onClick={() => setShowMessage(!showMessage)}
-          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-border text-text-main text-sm font-semibold bg-card transition-transform active:scale-[0.97]"
         >
           <MessageCircle size={18} /> Send a Message
-        </button>
+        </Button>
 
         {showMessage && (
-          <div className="mt-4">
+          <Card className="p-4 animate-fade-in-up">
             <textarea
               value={message}
               onChange={e => setMessage(e.target.value)}
               placeholder="Describe your issue or question..."
-              className="w-full p-3.5 rounded-xl border border-border text-sm bg-card text-text-main placeholder:text-text-secondary/50 min-h-[100px] resize-y mb-3"
+              className="w-full p-3.5 rounded-xl border border-border text-sm bg-card text-text-main placeholder:text-text-muted min-h-[100px] resize-y mb-3 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-colors"
             />
-            <button
+            <Button
               onClick={handleSend}
               disabled={!message.trim()}
-              className="w-full py-3.5 rounded-xl bg-primary text-white text-sm font-semibold transition-transform active:scale-[0.97] disabled:opacity-50"
+              className="w-full gap-2"
             >
               {sent ? (
-                <span className="flex items-center justify-center gap-2">
+                <>
                   <Check size={18} /> Sent!
-                </span>
-              ) : 'Send Message'}
-            </button>
-          </div>
+                </>
+              ) : (
+                <>
+                  <Send size={18} /> Send Message
+                </>
+              )}
+            </Button>
+          </Card>
         )}
       </div>
     </div>

@@ -2,8 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
+import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
-  User, ClipboardList, Bookmark, CreditCard, Bell,
+  ClipboardList, Bookmark, CreditCard, Bell,
   HelpCircle, FileText, LogOut, ChevronRight, Diamond, Calendar
 } from 'lucide-react';
 
@@ -28,24 +32,24 @@ export default function Profile() {
   ];
 
   return (
-    <div className="pb-5">
+    <div className="pb-6">
       <div className="px-5 pt-6 pb-2">
         <h1 className="text-2xl font-bold text-text-main">Profile</h1>
       </div>
 
-      <div className="flex flex-col items-center pt-6 pb-8 px-5">
-        <div className="w-[88px] h-[88px] rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-content-center justify-center mb-4">
-          <span className="text-white text-3xl font-bold">
+      <div className="flex flex-col items-center pt-6 pb-8 px-5 animate-fade-in-up">
+        <div className="w-[88px] h-[88px] rounded-full flex items-center justify-center mb-4 shadow-lg shadow-primary/25" style={{ background: 'linear-gradient(135deg, #8B1A2B, #A82040)' }}>
+          <span className="text-white text-4xl font-bold">
             {user?.name?.charAt(0)?.toUpperCase() || 'G'}
           </span>
         </div>
         <h2 className="text-2xl font-bold text-text-main mb-1">{user?.name || 'Guest'}</h2>
         <p className="text-sm text-text-secondary mb-3">{user?.email || 'guest@tapyard.com'}</p>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 bg-accent/15 text-accent px-3 py-1 rounded-full text-xs font-semibold">
+          <Badge variant="accent">
             <Diamond size={12} />
             {user?.tier || 'Bronze'}
-          </span>
+          </Badge>
           <span className="inline-flex items-center gap-1.5 bg-surface text-text-secondary px-3 py-1 rounded-full text-xs font-medium">
             <Calendar size={12} />
             Joined {joinDate}
@@ -53,84 +57,79 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="px-5 mb-5">
-        <div className="bg-card rounded-2xl border border-border flex items-center">
+      <div className="px-5 mb-5 animate-fade-in-up stagger-1">
+        <Card className="flex-row divide-x divide-border overflow-hidden">
           <div className="flex-1 text-center py-4">
-            <p className="text-lg font-bold text-text-main">{user?.points ?? 150}</p>
-            <p className="text-xs text-text-secondary">Points</p>
+            <p className="text-lg font-bold text-primary">{user?.points ?? 150}</p>
+            <p className="text-xs text-text-muted">Points</p>
           </div>
-          <div className="w-px h-10 bg-border" />
           <div className="flex-1 text-center py-4">
-            <p className="text-lg font-bold text-text-main">{user?.credits ?? 25}</p>
-            <p className="text-xs text-text-secondary">Credits</p>
+            <p className="text-lg font-bold text-primary">{user?.credits ?? 25}</p>
+            <p className="text-xs text-text-muted">Credits</p>
           </div>
-          <div className="w-px h-10 bg-border" />
           <div className="flex-1 text-center py-4">
-            <p className="text-lg font-bold text-accent">{user?.tier || 'Bronze'}</p>
-            <p className="text-xs text-text-secondary">Tier</p>
+            <p className="text-lg font-bold text-primary">{user?.tier || 'Bronze'}</p>
+            <p className="text-xs text-text-muted">Tier</p>
           </div>
-        </div>
+        </Card>
       </div>
 
-      <div className="px-5 mb-4">
-        <div className="bg-card rounded-[18px] border border-border overflow-hidden">
-          {menuGroup1.map((item, i) => (
+      <div className="px-5 mb-4 animate-fade-in-up stagger-2">
+        <Card className="divide-y divide-border overflow-hidden">
+          {menuGroup1.map((item) => (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex items-center justify-between w-full px-4 py-3.5 bg-transparent hover:bg-surface/50 transition-colors ${
-                i < menuGroup1.length - 1 ? 'border-b border-border' : ''
-              }`}
+              className="flex items-center justify-between w-full px-4 py-3.5 bg-transparent hover:bg-surface/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-surface flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-surface flex items-center justify-center">
                   <item.icon size={18} className="text-text-secondary" />
                 </div>
                 <span className="text-sm font-medium text-text-main">{item.label}</span>
               </div>
-              <ChevronRight size={18} className="text-text-secondary" />
+              <ChevronRight size={18} className="text-text-muted" />
             </button>
           ))}
-        </div>
+        </Card>
       </div>
 
-      <div className="px-5 mb-6">
-        <div className="bg-card rounded-[18px] border border-border overflow-hidden">
-          {menuGroup2.map((item, i) => (
+      <div className="px-5 mb-6 animate-fade-in-up stagger-3">
+        <Card className="divide-y divide-border overflow-hidden">
+          {menuGroup2.map((item) => (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex items-center justify-between w-full px-4 py-3.5 bg-transparent hover:bg-surface/50 transition-colors ${
-                i < menuGroup2.length - 1 ? 'border-b border-border' : ''
-              }`}
+              className="flex items-center justify-between w-full px-4 py-3.5 bg-transparent hover:bg-surface/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-surface flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-surface flex items-center justify-center">
                   <item.icon size={18} className="text-text-secondary" />
                 </div>
                 <span className="text-sm font-medium text-text-main">{item.label}</span>
               </div>
               <div className="flex items-center gap-2">
                 {item.badge ? (
-                  <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-error text-white text-[11px] font-semibold flex items-center justify-center">
+                  <Badge className="min-w-[20px] h-5 px-1.5 bg-error text-white text-[11px] font-semibold">
                     {item.badge}
-                  </span>
+                  </Badge>
                 ) : null}
-                <ChevronRight size={18} className="text-text-secondary" />
+                <ChevronRight size={18} className="text-text-muted" />
               </div>
             </button>
           ))}
-        </div>
+        </Card>
       </div>
 
-      <div className="px-5 pb-4">
-        <button
+      <div className="px-5 pb-4 animate-fade-in-up stagger-4">
+        <Button
+          variant="destructive"
           onClick={signOut}
-          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-error/8 border border-error/20 text-error text-[15px] font-semibold transition-colors hover:bg-error/15"
+          className="w-full"
         >
           <LogOut size={18} />
           Sign Out
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,7 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
-import { ArrowLeft, ClipboardList, FileText } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, ClipboardList, Download } from 'lucide-react';
+
+const STATUS_VARIANT: Record<string, 'success' | 'warning' | 'error' | 'default'> = {
+  completed: 'success',
+  preparing: 'warning',
+  delivered: 'default',
+  cancelled: 'error',
+};
 
 export default function OrderHistory() {
   const navigate = useNavigate();
@@ -34,73 +45,81 @@ export default function OrderHistory() {
     URL.revokeObjectURL(url);
   }
 
-  const statusColors: Record<string, string> = {
-    completed: '#1DB264',
-    preparing: '#E8A830',
-    delivered: '#3498DB',
-    cancelled: '#E03E3E',
-  };
-
-  const statusBg: Record<string, string> = {
-    completed: 'bg-success/15',
-    preparing: 'bg-warning/15',
-    delivered: 'bg-blue-500/15',
-    cancelled: 'bg-error/15',
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
-        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 rounded-full bg-surface">
-          <ArrowLeft size={22} className="text-text-main" />
-        </button>
-        <h1 className="text-xl font-bold text-text-main">Order History</h1>
+      <div className="sticky top-0 z-30 glass border-b border-white/20 shadow-sm">
+        <div className="flex items-center gap-3 px-5 pt-[67px] pb-3 max-w-[480px] mx-auto">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft size={22} />
+          </Button>
+          <h1 className="text-lg font-semibold text-text-main">Order History</h1>
+        </div>
       </div>
 
-      {orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 gap-3 text-text-secondary">
-          <ClipboardList size={48} />
-          <p className="text-sm">No orders yet</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3 p-5">
-          {orders.map(order => (
-            <div key={order.id} className="bg-card rounded-[14px] p-4 border border-border">
-              <div className="flex justify-between items-center mb-2.5">
-                <div>
-                  <p className="text-sm font-semibold text-text-main">
-                    {new Date(order.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                  <p className="text-xs text-text-secondary">Table {order.tableNumber}</p>
-                </div>
-                <span
-                  className={`text-[11px] font-semibold px-2.5 py-[3px] rounded-[10px] capitalize ${statusBg[order.status]}`}
-                  style={{ color: statusColors[order.status] }}
-                >
-                  {order.status}
-                </span>
-              </div>
-              <div className="mb-2.5">
-                {order.items.map((item, i) => (
-                  <div key={i} className="flex justify-between py-[3px] text-[13px]">
-                    <span className="text-text-secondary">{item.quantity}x {item.name}</span>
-                    <span className="text-text-main">£{item.price.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between items-center border-t border-border pt-2.5">
-                <span className="text-base font-bold text-text-main">£{order.total.toFixed(2)}</span>
-                <button
-                  onClick={() => downloadReceipt(order)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-transparent"
-                >
-                  <FileText size={14} /> Receipt
-                </button>
-              </div>
+      <div className="flex-1 max-w-[480px] mx-auto w-full overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center flex-1 min-h-[60vh] gap-3 text-text-secondary">
+            <div className="w-16 h-16 rounded-2xl bg-surface flex items-center justify-center">
+              <ClipboardList size={32} className="text-text-muted" />
             </div>
-          ))}
-        </div>
-      )}
+            <p className="text-sm font-medium">No orders yet</p>
+            <p className="text-xs text-text-muted">Your order history will appear here</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 p-5">
+            {orders.map((order, idx) => (
+              <Card
+                key={order.id}
+                className={cn(
+                  "overflow-hidden animate-fade-in-up",
+                  idx === 0 && "stagger-1",
+                  idx === 1 && "stagger-2",
+                  idx === 2 && "stagger-3",
+                  idx === 3 && "stagger-4",
+                  idx === 4 && "stagger-5",
+                  idx === 5 && "stagger-6"
+                )}
+              >
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <div>
+                      <p className="text-sm font-semibold text-text-main">
+                        {new Date(order.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                      <p className="text-xs text-text-secondary mt-0.5">Table {order.tableNumber}</p>
+                    </div>
+                    <Badge variant={STATUS_VARIANT[order.status] || 'default'} className="capitalize">
+                      {order.status}
+                    </Badge>
+                  </div>
+
+                  <div className="mb-3 space-y-1">
+                    {order.items.map((item, i) => (
+                      <div key={i} className="flex justify-between text-[13px]">
+                        <span className="text-text-secondary">{item.quantity}x {item.name}</span>
+                        <span className="text-text-main font-medium">£{item.price.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between items-center border-t border-border pt-3">
+                    <span className="text-base font-bold text-text-main">£{order.total.toFixed(2)}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => downloadReceipt(order)}
+                      className="gap-1.5"
+                    >
+                      <Download size={14} />
+                      Receipt
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

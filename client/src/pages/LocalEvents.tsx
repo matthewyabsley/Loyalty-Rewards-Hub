@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Film, ExternalLink, X } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, DarkCard } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ArrowLeft, MapPin, Calendar, Film, ExternalLink, Star } from 'lucide-react';
 
 const LOCAL_EVENTS = [
   { id: 'l1', title: 'Wilmslow Artisan Market', description: 'Browse local artisan stalls with handmade crafts, fresh produce, and street food.', date: '2026-03-08', time: '10:00 - 16:00', location: 'Grove Street, Wilmslow', category: 'Market' },
@@ -12,10 +17,10 @@ const LOCAL_EVENTS = [
 ];
 
 const CINEMA = [
-  { id: 'c1', title: 'The Grand Budapest Hotel', time: '14:00, 17:30, 20:00', rating: 'PG-13' },
-  { id: 'c2', title: 'Paddington 3', time: '11:00, 13:30, 16:00', rating: 'PG' },
-  { id: 'c3', title: 'Oppenheimer', time: '18:00, 21:00', rating: '15' },
-  { id: 'c4', title: 'Wonka', time: '10:30, 13:00, 15:30', rating: 'PG' },
+  { id: 'c1', title: 'The Grand Budapest Hotel', time: '14:00, 17:30, 20:00', rating: 'PG-13', genre: 'Comedy' },
+  { id: 'c2', title: 'Paddington 3', time: '11:00, 13:30, 16:00', rating: 'PG', genre: 'Family' },
+  { id: 'c3', title: 'Oppenheimer', time: '18:00, 21:00', rating: '15', genre: 'Drama' },
+  { id: 'c4', title: 'Wonka', time: '10:30, 13:00, 15:30', rating: 'PG', genre: 'Fantasy' },
 ];
 
 export default function LocalEvents() {
@@ -25,145 +30,146 @@ export default function LocalEvents() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-[480px] mx-auto w-full">
-      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3 bg-card border-b border-border">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-surface text-text-main"
-        >
-          <ArrowLeft size={22} />
-        </button>
-        <h1 className="text-xl font-bold text-text-main">Wilmslow Local</h1>
+      <div className="sticky top-0 z-30 glass border-b border-white/20 shadow-sm">
+        <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft size={22} />
+          </Button>
+          <h1 className="text-lg font-semibold text-text-main">Wilmslow Local</h1>
+        </div>
       </div>
 
-      <div className="flex gap-2 px-5 mt-4">
+      <div className="flex gap-1 mx-5 mt-4 p-1 bg-surface rounded-full">
         <button
           onClick={() => setTab('events')}
-          className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-colors ${
+          className={cn(
+            "flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200",
             tab === 'events'
-              ? 'bg-primary text-white'
-              : 'bg-card text-text-main border border-border'
-          }`}
+              ? 'bg-primary text-white shadow-md shadow-primary/25'
+              : 'text-text-muted hover:text-text-main'
+          )}
         >
           Local Events
         </button>
         <button
           onClick={() => setTab('cinema')}
-          className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-colors ${
+          className={cn(
+            "flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200",
             tab === 'cinema'
-              ? 'bg-primary text-white'
-              : 'bg-card text-text-main border border-border'
-          }`}
+              ? 'bg-primary text-white shadow-md shadow-primary/25'
+              : 'text-text-muted hover:text-text-main'
+          )}
         >
           Rex Cinema
         </button>
       </div>
 
-      <div className="p-5">
+      <div className="p-5 pb-8">
         {tab === 'events' ? (
           <div className="flex flex-col gap-3">
-            {LOCAL_EVENTS.map(event => (
-              <div
+            {LOCAL_EVENTS.map((event, index) => (
+              <Card
                 key={event.id}
-                className="bg-card rounded-[14px] p-4 border border-border shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                className={cn(
+                  "p-4 animate-fade-in-up",
+                  index === 0 && "stagger-1",
+                  index === 1 && "stagger-2",
+                  index === 2 && "stagger-3",
+                  index === 3 && "stagger-4",
+                  index === 4 && "stagger-5",
+                  index === 5 && "stagger-6"
+                )}
               >
-                <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
-                  {event.category}
-                </span>
-                <h3 className="text-[15px] font-semibold text-text-main mt-2 mb-1">{event.title}</h3>
-                <p className="text-xs text-text-secondary mb-2.5 leading-relaxed">{event.description}</p>
-                <div className="flex flex-col gap-1 mb-3">
-                  <span className="text-xs text-text-secondary flex items-center gap-1">
-                    <Calendar size={13} />
+                <div className="flex items-start justify-between mb-2">
+                  <Badge>{event.category}</Badge>
+                </div>
+                <h3 className="text-[15px] font-semibold text-text-main mb-1">{event.title}</h3>
+                <p className="text-xs text-text-secondary mb-3 leading-relaxed">{event.description}</p>
+                <div className="flex flex-col gap-1.5 mb-3">
+                  <span className="text-xs text-text-muted flex items-center gap-1.5">
+                    <Calendar size={13} className="text-primary/60" />
                     {new Date(event.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · {event.time}
                   </span>
                   <button
                     onClick={() => setMapLocation(event.location)}
-                    className="text-xs text-primary flex items-center gap-1 bg-transparent p-0"
+                    className="text-xs text-primary flex items-center gap-1.5 bg-transparent p-0 font-medium"
                   >
                     <MapPin size={13} /> {event.location}
                   </button>
                 </div>
-                <button
+                <Button
+                  variant="accent"
+                  size="sm"
                   onClick={() => navigate(`/book-table?date=${event.date}`)}
-                  className="text-xs font-semibold text-accent-dark bg-accent/10 px-3.5 py-1.5 rounded-lg transition-colors hover:bg-accent/20"
                 >
-                  Book a table after →
-                </button>
-              </div>
+                  Book a table after
+                </Button>
+              </Card>
             ))}
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <div
-              className="rounded-[14px] p-4 text-white mb-1"
-              style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Film size={18} />
-                <span className="text-[15px] font-bold">Rex Cinema Wilmslow</span>
+            <DarkCard className="p-5 mb-1 animate-fade-in-up" style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}>
+              <div className="flex items-center gap-2.5 mb-1">
+                <Film size={20} className="text-white" />
+                <span className="text-[15px] font-bold text-white">Rex Cinema Wilmslow</span>
               </div>
-              <p className="text-xs opacity-70">Now showing</p>
-            </div>
-            {CINEMA.map(film => (
-              <div
+              <p className="text-xs text-white/60">Now showing</p>
+            </DarkCard>
+            {CINEMA.map((film, index) => (
+              <Card
                 key={film.id}
-                className="bg-card rounded-[14px] p-4 border border-border shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                className={cn(
+                  "p-4 animate-fade-in-up",
+                  index === 0 && "stagger-1",
+                  index === 1 && "stagger-2",
+                  index === 2 && "stagger-3",
+                  index === 3 && "stagger-4"
+                )}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-[15px] font-semibold text-text-main">{film.title}</h3>
-                  <span className="text-[10px] font-semibold border border-border px-2 py-0.5 rounded-md text-text-main">
-                    {film.rating}
-                  </span>
+                  <h3 className="text-[15px] font-semibold text-text-main pr-3">{film.title}</h3>
+                  <div className="flex gap-1.5 shrink-0">
+                    <Badge variant="outline">{film.rating}</Badge>
+                    <Badge variant="accent">{film.genre}</Badge>
+                  </div>
                 </div>
-                <p className="text-xs text-text-secondary mb-2.5">{film.time}</p>
-                <button
+                <p className="text-xs text-text-secondary mb-3">{film.time}</p>
+                <Button
+                  variant="accent"
+                  size="sm"
                   onClick={() => navigate('/book-table')}
-                  className="text-xs font-semibold text-accent-dark bg-accent/10 px-3.5 py-1.5 rounded-lg transition-colors hover:bg-accent/20"
                 >
-                  Book a table after →
-                </button>
-              </div>
+                  Book a table after
+                </Button>
+              </Card>
             ))}
           </div>
         )}
       </div>
 
-      {mapLocation && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"
-          onClick={() => setMapLocation(null)}
-        >
-          <div
-            className="bg-card w-full max-w-[480px] rounded-t-[20px] p-5 pb-8"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-base font-semibold text-text-main">{mapLocation}</h3>
-              <button
-                onClick={() => setMapLocation(null)}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-surface text-text-secondary"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      <Sheet open={!!mapLocation} onOpenChange={(open) => { if (!open) setMapLocation(null); }}>
+        <SheetContent>
+          <div className="p-5 pt-6">
+            <h3 className="text-base font-semibold text-text-main mb-4">{mapLocation}</h3>
             <div className="w-full h-[250px] rounded-xl overflow-hidden border border-border">
               <iframe
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(mapLocation)}&output=embed`}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(mapLocation || '')}&output=embed`}
                 className="w-full h-full border-none"
                 title="Map"
               />
             </div>
             <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(mapLocation)}`}
+              href={`https://maps.google.com/?q=${encodeURIComponent(mapLocation || '')}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-center gap-1.5 mt-3 py-2.5 text-[13px] font-semibold text-primary"
+              className="flex items-center justify-center gap-1.5 mt-4 py-2.5 text-[13px] font-semibold text-primary"
             >
               <ExternalLink size={14} /> Open in Google Maps
             </a>
           </div>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

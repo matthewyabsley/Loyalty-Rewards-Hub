@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { UtensilsCrossed, Mail, Chrome, Apple, Facebook, Gift, CalendarDays, QrCode } from 'lucide-react';
 
 export default function Welcome() {
@@ -19,52 +21,66 @@ export default function Welcome() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10"
-      style={{ background: 'linear-gradient(135deg, #6B1420 0%, #8B1A2B 50%, #3D0A14 100%)' }}>
-
-      <div className="text-center mb-12">
-        <div className="w-20 h-20 rounded-3xl bg-accent/15 backdrop-blur-[10px] flex items-center justify-center mx-auto mb-5">
-          <UtensilsCrossed size={36} className="text-accent" />
-        </div>
-        <h1 className="text-4xl font-bold text-white mb-2" style={{ fontSize: 36 }}>Tap Yard</h1>
-        <p className="text-[15px] text-white/60">Your loyalty, rewarded</p>
-      </div>
-
-      <div className="flex flex-col gap-5 mb-10 w-full max-w-[360px]">
-        {[
-          { icon: <Gift size={20} className="text-accent" />, text: 'Earn rewards with every visit' },
-          { icon: <CalendarDays size={20} className="text-accent" />, text: 'Book tables in seconds' },
-          { icon: <QrCode size={20} className="text-accent" />, text: 'Scan & redeem instantly' },
-        ].map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            {item.icon}
-            <span className="text-white/85 text-[15px]">{item.text}</span>
+    <div
+      className="h-full flex flex-col items-center justify-between px-6 py-12 overflow-y-auto"
+      style={{ background: 'linear-gradient(135deg, #6B1420 0%, #8B1A2B 40%, #3D0A14 100%)' }}
+    >
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-[360px]">
+        <div className="text-center mb-10 animate-fade-in-up">
+          <div className="w-20 h-20 rounded-3xl glass-dark flex items-center justify-center mx-auto mb-5 border border-white/10">
+            <UtensilsCrossed size={36} className="text-accent" />
           </div>
-        ))}
+          <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Tap Yard</h1>
+          <p className="text-[15px] text-white/60">Your loyalty, rewarded</p>
+        </div>
+
+        <div className="flex flex-col gap-4 mb-10 w-full opacity-0 animate-fade-in-up stagger-1">
+          {[
+            { icon: <Gift size={20} className="text-accent" />, text: 'Earn rewards with every visit' },
+            { icon: <CalendarDays size={20} className="text-accent" />, text: 'Book tables in seconds' },
+            { icon: <QrCode size={20} className="text-accent" />, text: 'Scan & redeem instantly' },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className={cn(
+                "flex items-center gap-3 opacity-0 animate-fade-in-up",
+                i === 0 && "stagger-2",
+                i === 1 && "stagger-3",
+                i === 2 && "stagger-4"
+              )}
+            >
+              {item.icon}
+              <span className="text-white/80 text-[15px]">{item.text}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="w-full max-w-[360px]">
+      <div className="w-full max-w-[360px] opacity-0 animate-fade-in-up stagger-5">
         {!showEmail ? (
           <>
             <div className="flex flex-col gap-3 mb-6">
-              <button
+              <Button
+                variant="glass"
+                className="w-full py-4 h-auto text-[15px] font-semibold gap-2.5 bg-white/90 border-white/30 text-gray-800 hover:bg-white"
                 onClick={() => handleSocial('google')}
-                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-white text-gray-800 active:scale-[0.98] transition-transform"
               >
                 <Chrome size={20} /> Continue with Google
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="dark"
+                className="w-full py-4 h-auto text-[15px] font-semibold gap-2.5"
                 onClick={() => handleSocial('apple')}
-                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-[#1A1A1A] text-white active:scale-[0.98] transition-transform"
               >
                 <Apple size={20} /> Continue with Apple
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="glass"
+                className="w-full py-4 h-auto text-[15px] font-semibold gap-2.5 bg-[#1877F2] border-[#1877F2]/30 text-white hover:bg-[#1565D8]"
                 onClick={() => handleSocial('facebook')}
-                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-[#1877F2] text-white active:scale-[0.98] transition-transform"
               >
                 <Facebook size={20} /> Continue with Facebook
-              </button>
+              </Button>
             </div>
 
             <div className="flex items-center gap-4 mb-6">
@@ -73,12 +89,13 @@ export default function Welcome() {
               <div className="flex-1 h-px bg-white/25" />
             </div>
 
-            <button
+            <Button
+              variant="ghost"
+              className="w-full py-4 h-auto text-[15px] font-semibold gap-2.5 text-white border-2 border-white/30 hover:bg-white/10"
               onClick={() => setShowEmail(true)}
-              className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-transparent text-white border-2 border-white/30 active:scale-[0.98] transition-transform"
             >
               <Mail size={20} /> Sign up with Email
-            </button>
+            </Button>
           </>
         ) : (
           <form onSubmit={handleEmail} className="flex flex-col gap-3">
@@ -87,25 +104,26 @@ export default function Welcome() {
               placeholder="Full Name"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="py-3.5 px-4 rounded-xl border-none text-[15px] bg-white/10 text-white backdrop-blur-[10px] placeholder:text-white/40"
+              className="py-3.5 px-4 rounded-xl text-[15px] bg-white/10 backdrop-blur-sm text-white border border-white/15 placeholder:text-white/40 focus:border-white/30 transition-colors"
             />
             <input
               type="email"
               placeholder="Email Address"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="py-3.5 px-4 rounded-xl border-none text-[15px] bg-white/10 text-white backdrop-blur-[10px] placeholder:text-white/40"
+              className="py-3.5 px-4 rounded-xl text-[15px] bg-white/10 backdrop-blur-sm text-white border border-white/15 placeholder:text-white/40 focus:border-white/30 transition-colors"
             />
-            <button
+            <Button
               type="submit"
-              className="py-3.5 px-5 rounded-xl text-[15px] font-semibold bg-accent text-white mt-1 active:scale-[0.98] transition-transform"
+              variant="accent"
+              className="w-full py-3.5 h-auto text-[15px] font-semibold mt-1"
             >
               Get Started
-            </button>
+            </Button>
             <button
               type="button"
               onClick={() => setShowEmail(false)}
-              className="py-3 bg-transparent text-white/70 text-sm"
+              className="py-3 bg-transparent text-white/70 text-sm active:scale-[0.97] transition-transform"
             >
               Back to sign in options
             </button>

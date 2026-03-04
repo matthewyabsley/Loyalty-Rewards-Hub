@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 
 const TERMS = [
@@ -27,45 +30,51 @@ export default function TermsPrivacy() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
-        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 rounded-full bg-surface">
-          <ArrowLeft size={22} className="text-text-main" />
-        </button>
-        <h1 className="text-xl font-bold text-text-main">Terms & Privacy</h1>
+      <div className="sticky top-0 z-30 glass border-b border-white/20 shadow-sm">
+        <div className="flex items-center gap-3 px-5 pt-[67px] pb-3 max-w-[480px] mx-auto">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft size={22} />
+          </Button>
+          <h1 className="text-lg font-semibold text-text-main">Terms & Privacy</h1>
+        </div>
       </div>
 
-      <div className="flex gap-2 px-5 mt-1">
-        <button
-          onClick={() => setTab('terms')}
-          className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-colors ${
-            tab === 'terms'
-              ? 'bg-primary text-white'
-              : 'bg-card text-text-main border border-border'
-          }`}
-        >
-          Terms of Service
-        </button>
-        <button
-          onClick={() => setTab('privacy')}
-          className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-colors ${
-            tab === 'privacy'
-              ? 'bg-primary text-white'
-              : 'bg-card text-text-main border border-border'
-          }`}
-        >
-          Privacy Policy
-        </button>
-      </div>
+      <div className="flex-1 max-w-[480px] mx-auto w-full overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex gap-2 px-5 pt-4">
+          <button
+            onClick={() => setTab('terms')}
+            className={cn(
+              "flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200",
+              tab === 'terms'
+                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                : 'bg-card text-text-main border border-border'
+            )}
+          >
+            Terms of Service
+          </button>
+          <button
+            onClick={() => setTab('privacy')}
+            className={cn(
+              "flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200",
+              tab === 'privacy'
+                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                : 'bg-card text-text-main border border-border'
+            )}
+          >
+            Privacy Policy
+          </button>
+        </div>
 
-      <div className="p-5">
-        <p className="text-xs text-text-secondary mb-4">Last updated: February 2026</p>
-        <div className="flex flex-col gap-4">
-          {sections.map((s, i) => (
-            <div key={i}>
-              <h3 className="text-sm font-semibold text-text-main mb-1.5">{s.title}</h3>
-              <p className="text-[13px] text-text-secondary leading-[1.6]">{s.content}</p>
-            </div>
-          ))}
+        <div className="p-5">
+          <p className="text-xs text-text-muted mb-4">Last updated: February 2026</p>
+          <div className="flex flex-col gap-4">
+            {sections.map((s, i) => (
+              <Card key={i} className={cn("p-4 animate-fade-in-up", `stagger-${Math.min(i + 1, 6)}`)}>
+                <h3 className="text-sm font-semibold text-text-main mb-1.5">{s.title}</h3>
+                <p className="text-[13px] text-text-secondary leading-[1.6]">{s.content}</p>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </div>
