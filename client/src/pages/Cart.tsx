@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
-import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Check, ChevronDown } from 'lucide-react';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -18,70 +18,93 @@ export default function Cart() {
 
   if (ordered) {
     return (
-      <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center' }}>
-        <div style={{ width: 64, height: 64, borderRadius: 32, background: '#1DB26415', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <Check size={32} color="var(--success)" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-10 text-center">
+        <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
+          <Check size={36} className="text-success" />
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Order Placed!</h2>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>Your order is being prepared for Table {tableNum}</p>
-        <button onClick={() => navigate('/')} className="btn-primary" style={{ maxWidth: 280 }}>Back to Home</button>
+        <h2 className="text-[22px] font-bold text-text-main mb-2">Order Placed!</h2>
+        <p className="text-sm text-text-secondary mb-8">
+          Your order is being prepared for Table {tableNum}
+        </p>
+        <button
+          onClick={() => navigate('/')}
+          className="w-full max-w-[280px] py-4 rounded-2xl bg-gradient-to-r from-primary-dark to-primary text-white font-semibold text-[15px] shadow-lg active:scale-[0.98] transition-transform"
+        >
+          Back to Home
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-        <h1>Your Cart</h1>
+    <div className="min-h-screen bg-background pb-6">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm px-5 pt-[67px] pb-3 flex items-center gap-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-card shadow-sm"
+        >
+          <ArrowLeft size={20} className="text-text-main" />
+        </button>
+        <h1 className="text-xl font-bold text-text-main">Your Cart</h1>
       </div>
 
       {cart.length === 0 ? (
-        <div className="empty-state">
-          <ShoppingCart size={48} />
-          <p>Your cart is empty</p>
-          <button onClick={() => navigate('/menu')} className="btn-primary" style={{ maxWidth: 200, marginTop: 16 }}>Browse Menu</button>
+        <div className="flex flex-col items-center justify-center py-24 px-5">
+          <div className="w-20 h-20 rounded-full bg-surface flex items-center justify-center mb-4">
+            <ShoppingCart size={32} className="text-text-secondary" />
+          </div>
+          <p className="text-base text-text-secondary mb-6">Your cart is empty</p>
+          <button
+            onClick={() => navigate('/menu')}
+            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-primary-dark to-primary text-white font-semibold text-sm shadow-lg active:scale-[0.98] transition-transform"
+          >
+            Browse Menu
+          </button>
         </div>
       ) : (
-        <div style={{ padding: 20 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+        <div className="px-5">
+          <div className="flex flex-col gap-3 mb-5">
             {cart.map(c => {
               const optionsPrice = c.selectedOptions ? Object.values(c.selectedOptions).reduce((s, o) => s + o.price, 0) : 0;
               const unitPrice = c.item.price + optionsPrice;
               return (
-                <div key={c.cartId} style={{
-                  background: 'var(--card)', borderRadius: 14, padding: 14,
-                  border: '1px solid var(--border)',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{c.item.name}</h3>
+                <div key={c.cartId} className="bg-card rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold text-text-main mb-1">{c.item.name}</h3>
                       {c.selectedOptions && (
-                        <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                        <p className="text-[11px] text-text-secondary">
                           {Object.values(c.selectedOptions).map(o => o.name).join(', ')}
                         </p>
                       )}
-                      {c.notes && <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontStyle: 'italic' }}>{c.notes}</p>}
+                      {c.notes && (
+                        <p className="text-[11px] text-text-secondary italic mt-0.5">{c.notes}</p>
+                      )}
                     </div>
-                    <button onClick={() => removeFromCart(c.cartId)} style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-                    }}>
-                      <Trash2 size={16} color="var(--error)" />
+                    <button
+                      onClick={() => removeFromCart(c.cartId)}
+                      className="p-1.5 rounded-lg hover:bg-error/10 transition-colors"
+                    >
+                      <Trash2 size={15} className="text-error" />
                     </button>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <button onClick={() => updateCartQuantity(c.cartId, c.quantity - 1)} style={{
-                        width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'var(--surface)', border: '1px solid var(--border)', cursor: 'pointer',
-                      }}><Minus size={14} /></button>
-                      <span style={{ fontSize: 14, fontWeight: 600 }}>{c.quantity}</span>
-                      <button onClick={() => updateCartQuantity(c.cartId, c.quantity + 1)} style={{
-                        width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'var(--surface)', border: '1px solid var(--border)', cursor: 'pointer',
-                      }}><Plus size={14} /></button>
+                  <div className="flex justify-between items-center mt-3">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updateCartQuantity(c.cartId, c.quantity - 1)}
+                        className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center active:scale-95 transition-transform"
+                      >
+                        <Minus size={14} className="text-text-main" />
+                      </button>
+                      <span className="text-sm font-semibold text-text-main w-5 text-center">{c.quantity}</span>
+                      <button
+                        onClick={() => updateCartQuantity(c.cartId, c.quantity + 1)}
+                        className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center active:scale-95 transition-transform"
+                      >
+                        <Plus size={14} className="text-text-main" />
+                      </button>
                     </div>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--primary)' }}>
+                    <span className="text-[15px] font-bold text-primary">
                       £{(unitPrice * c.quantity).toFixed(2)}
                     </span>
                   </div>
@@ -90,38 +113,44 @@ export default function Cart() {
             })}
           </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, display: 'block' }}>Table Number</label>
-            <select value={tableNum} onChange={e => setTableNum(Number(e.target.value))} style={{
-              width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border)',
-              fontSize: 14, background: 'var(--card)',
-            }}>
-              {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
-                <option key={n} value={n}>Table {n}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{
-            background: 'var(--card)', borderRadius: 14, padding: 16,
-            border: '1px solid var(--border)', marginBottom: 20,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Subtotal</span>
-              <span style={{ fontSize: 13 }}>£{cartTotal.toFixed(2)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Service charge</span>
-              <span style={{ fontSize: 13 }}>£0.00</span>
-            </div>
-            <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 16, fontWeight: 700 }}>Total</span>
-              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--primary)' }}>£{cartTotal.toFixed(2)}</span>
+          <div className="mb-5">
+            <label className="text-sm font-semibold text-text-main mb-2 block">Table Number</label>
+            <div className="relative">
+              <select
+                value={tableNum}
+                onChange={e => setTableNum(Number(e.target.value))}
+                className="w-full py-3 px-4 rounded-xl border border-border bg-card text-sm text-text-main appearance-none"
+              >
+                {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
+                  <option key={n} value={n}>Table {n}</option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
             </div>
           </div>
 
-          <button onClick={handleOrder} className="btn-primary">Place Order</button>
+          <div className="bg-card rounded-[18px] p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] mb-5">
+            <div className="flex justify-between mb-2">
+              <span className="text-[13px] text-text-secondary">Subtotal</span>
+              <span className="text-[13px] text-text-main">£{cartTotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="text-[13px] text-text-secondary">Service charge</span>
+              <span className="text-[13px] text-text-main">£0.00</span>
+            </div>
+            <div className="h-px bg-border my-3" />
+            <div className="flex justify-between">
+              <span className="text-base font-bold text-text-main">Total</span>
+              <span className="text-base font-bold text-primary">£{cartTotal.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleOrder}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary-dark to-primary text-white font-semibold text-[15px] shadow-lg active:scale-[0.98] transition-transform"
+          >
+            Place Order
+          </button>
         </div>
       )}
     </div>

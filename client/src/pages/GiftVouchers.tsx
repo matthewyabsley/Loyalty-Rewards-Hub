@@ -31,130 +31,180 @@ export default function GiftVouchers() {
 
   if (purchased) {
     return (
-      <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center' }}>
-        <div style={{ width: 64, height: 64, borderRadius: 32, background: '#1DB26415', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <Check size={32} color="var(--success)" />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background max-w-[480px] mx-auto w-full px-10 text-center">
+        <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-5">
+          <Check size={32} className="text-success" />
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Voucher Purchased!</h2>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
+        <h2 className="text-[22px] font-bold text-text-main mb-2">Voucher Purchased!</h2>
+        <p className="text-sm text-text-secondary mb-6">
           £{selectedAmount} gift voucher has been {delivery === 'wallet' ? 'added to wallet' : 'sent successfully'}
         </p>
-        <button onClick={() => navigate('/')} className="btn-primary" style={{ maxWidth: 280 }}>Back to Home</button>
+        <button
+          onClick={() => navigate('/')}
+          className="w-full max-w-[280px] py-4 rounded-2xl font-semibold text-white text-[15px] transition-transform active:scale-[0.97]"
+          style={{ background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' }}
+        >
+          Back to Home
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-        <h1>Gift Vouchers</h1>
+    <div className="flex flex-col min-h-screen bg-background max-w-[480px] mx-auto w-full">
+      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3 bg-card border-b border-border">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-surface text-text-main"
+        >
+          <ArrowLeft size={22} />
+        </button>
+        <h1 className="text-xl font-bold text-text-main">Gift Vouchers</h1>
       </div>
 
-      <div style={{ padding: 20 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Choose Amount</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+      <div className="p-5">
+        <h2 className="text-base font-semibold text-text-main mb-3">Choose Amount</h2>
+        <div className="grid grid-cols-3 gap-2.5 mb-6">
           {DENOMINATIONS.map(amt => (
-            <button key={amt} onClick={() => setSelectedAmount(amt)} style={{
-              background: selectedAmount === amt
-                ? 'linear-gradient(135deg, var(--primary-dark), var(--primary))'
-                : 'var(--card)',
-              color: selectedAmount === amt ? '#fff' : 'var(--text)',
-              border: selectedAmount === amt ? 'none' : '1px solid var(--border)',
-              borderRadius: 14, padding: '16px 8px', cursor: 'pointer', textAlign: 'center',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 4 }}>
-                <Gift size={14} />
-                <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.8 }}>Tap Yard</span>
+            <button
+              key={amt}
+              onClick={() => setSelectedAmount(amt)}
+              className={`rounded-[14px] py-4 px-2 text-center transition-transform active:scale-[0.97] ${
+                selectedAmount === amt
+                  ? 'text-white shadow-lg'
+                  : 'bg-card text-text-main border border-border'
+              }`}
+              style={selectedAmount === amt ? { background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' } : undefined}
+            >
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Gift size={14} className={selectedAmount === amt ? 'text-white' : 'text-text-secondary'} />
+                <span className={`text-[11px] font-semibold ${selectedAmount === amt ? 'opacity-80' : 'text-text-secondary'}`}>
+                  Tap Yard
+                </span>
               </div>
-              <p style={{ fontSize: 22, fontWeight: 700 }}>£{amt}</p>
+              <p className="text-[22px] font-bold">£{amt}</p>
             </button>
           ))}
         </div>
 
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Delivery Method</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+        <h2 className="text-base font-semibold text-text-main mb-3">Delivery Method</h2>
+        <div className="flex flex-col gap-2 mb-6">
           {DELIVERY_OPTIONS.map(opt => (
-            <button key={opt.id} onClick={() => setDelivery(opt.id)} style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
-              borderRadius: 12, cursor: 'pointer',
-              background: delivery === opt.id ? 'var(--primary)' + '10' : 'var(--card)',
-              border: delivery === opt.id ? '2px solid var(--primary)' : '1px solid var(--border)',
-            }}>
-              <opt.icon size={20} color={delivery === opt.id ? 'var(--primary)' : 'var(--text-secondary)'} />
-              <span style={{ fontSize: 14, fontWeight: delivery === opt.id ? 600 : 400 }}>{opt.label}</span>
+            <button
+              key={opt.id}
+              onClick={() => setDelivery(opt.id)}
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-colors ${
+                delivery === opt.id
+                  ? 'bg-primary/10 border-2 border-primary'
+                  : 'bg-card border border-border'
+              }`}
+            >
+              <opt.icon
+                size={20}
+                className={delivery === opt.id ? 'text-primary' : 'text-text-secondary'}
+              />
+              <span className={`text-sm ${delivery === opt.id ? 'font-semibold text-text-main' : 'text-text-main'}`}>
+                {opt.label}
+              </span>
             </button>
           ))}
         </div>
 
         {delivery !== 'wallet' && (
-          <div style={{ marginBottom: 24 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Recipient Details</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="mb-6">
+            <h2 className="text-base font-semibold text-text-main mb-3">Recipient Details</h2>
+            <div className="flex flex-col gap-2.5">
               <input
-                type="text" placeholder="Recipient Name" value={recipientName} onChange={e => setRecipientName(e.target.value)}
-                style={{
-                  padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border)',
-                  fontSize: 14, background: 'var(--card)',
-                }}
+                type="text"
+                placeholder="Recipient Name"
+                value={recipientName}
+                onChange={e => setRecipientName(e.target.value)}
+                className="px-3.5 py-3 rounded-xl border border-border text-sm bg-card text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary/20"
               />
               <input
                 type={delivery === 'email' ? 'email' : 'tel'}
                 placeholder={delivery === 'email' ? 'Email Address' : 'Phone Number'}
-                value={recipientContact} onChange={e => setRecipientContact(e.target.value)}
-                style={{
-                  padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border)',
-                  fontSize: 14, background: 'var(--card)',
-                }}
+                value={recipientContact}
+                onChange={e => setRecipientContact(e.target.value)}
+                className="px-3.5 py-3 rounded-xl border border-border text-sm bg-card text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary/20"
               />
               <textarea
-                placeholder="Personal message (optional)" value={personalMessage} onChange={e => setPersonalMessage(e.target.value)}
-                style={{
-                  padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border)',
-                  fontSize: 14, background: 'var(--card)', minHeight: 60, resize: 'vertical',
-                }}
+                placeholder="Personal message (optional)"
+                value={personalMessage}
+                onChange={e => setPersonalMessage(e.target.value)}
+                className="px-3.5 py-3 rounded-xl border border-border text-sm bg-card text-text-main placeholder:text-text-secondary/60 min-h-[60px] resize-y focus:border-primary focus:ring-1 focus:ring-primary/20"
               />
             </div>
           </div>
         )}
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, cursor: 'pointer' }}>
-          <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width: 18, height: 18 }} />
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>I agree to the gift voucher terms & conditions</span>
+        <label className="flex items-center gap-2.5 mb-5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={e => setAgreed(e.target.checked)}
+            className="w-[18px] h-[18px] accent-primary rounded"
+          />
+          <span className="text-[13px] text-text-secondary">
+            I agree to the gift voucher terms & conditions
+          </span>
         </label>
 
         <button
           onClick={() => setShowConfirm(true)}
           disabled={!selectedAmount || !agreed}
-          className="btn-primary"
+          className="w-full py-4 rounded-2xl font-semibold text-white text-[15px] transition-transform active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' }}
         >
           Purchase · £{selectedAmount || 0}
         </button>
       </div>
 
       {showConfirm && (
-        <div className="modal-overlay" onClick={() => setShowConfirm(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700 }}>Confirm Purchase</h2>
-              <button onClick={() => setShowConfirm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={22} /></button>
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="bg-card w-full max-w-[480px] rounded-t-[20px] p-5 pb-8"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-lg font-bold text-text-main">Confirm Purchase</h2>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-surface text-text-secondary"
+              >
+                <X size={18} />
+              </button>
             </div>
-            <div style={{
-              background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))',
-              borderRadius: 16, padding: 20, color: '#fff', marginBottom: 20, textAlign: 'center',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8 }}>
+
+            <div
+              className="rounded-2xl p-5 text-white mb-5 text-center"
+              style={{ background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' }}
+            >
+              <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Gift size={16} />
-                <span style={{ fontSize: 12, fontWeight: 600 }}>Tap Yard</span>
+                <span className="text-xs font-semibold">Tap Yard</span>
               </div>
-              <p style={{ fontSize: 32, fontWeight: 700 }}>£{selectedAmount}</p>
-              <p style={{ fontSize: 12, opacity: 0.7 }}>GIFT VOUCHER</p>
+              <p className="text-[32px] font-bold">£{selectedAmount}</p>
+              <p className="text-xs opacity-70 tracking-wider">GIFT VOUCHER</p>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
-              <p style={{ marginBottom: 4 }}>Delivery: {DELIVERY_OPTIONS.find(o => o.id === delivery)?.label}</p>
-              {defaultPayment && <p>Payment: {defaultPayment.type.toUpperCase()} •••• {defaultPayment.last4}</p>}
+
+            <div className="text-[13px] text-text-secondary mb-4 space-y-1">
+              <p>Delivery: {DELIVERY_OPTIONS.find(o => o.id === delivery)?.label}</p>
+              {defaultPayment && (
+                <p>Payment: {defaultPayment.type.toUpperCase()} •••• {defaultPayment.last4}</p>
+              )}
             </div>
-            <button onClick={handlePurchase} className="btn-primary">Confirm & Pay £{selectedAmount}</button>
+
+            <button
+              onClick={handlePurchase}
+              className="w-full py-4 rounded-2xl font-semibold text-white text-[15px] transition-transform active:scale-[0.97]"
+              style={{ background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' }}
+            >
+              Confirm & Pay £{selectedAmount}
+            </button>
           </div>
         </div>
       )}

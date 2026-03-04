@@ -1,117 +1,195 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
-import { Star, TrendingUp, TrendingDown, Award } from 'lucide-react';
+import { Shield, TrendingUp, TrendingDown, Award, Calendar, Star, Gift } from 'lucide-react';
 
 const TIERS = [
-  { name: 'Bronze', min: 0, max: 200, color: '#CD7F32' },
-  { name: 'Silver', min: 200, max: 500, color: '#C0C0C0' },
-  { name: 'Gold', min: 500, max: 1000, color: '#FFD700' },
-  { name: 'Platinum', min: 1000, max: 2000, color: '#E5E4E2' },
+  { name: 'Bronze', min: 0, max: 499, color: '#CD7F32' },
+  { name: 'Silver', min: 500, max: 1999, color: '#A8A8A8' },
+  { name: 'Gold', min: 2000, max: 4999, color: '#D4A853' },
+  { name: 'Platinum', min: 5000, max: 99999, color: '#B0B0B8' },
 ];
 
 export default function Points() {
   const { user } = useAuth();
   const { transactions } = useData();
   const points = user?.points || 0;
-  const tier = TIERS.find(t => t.name === user?.tier) || TIERS[0];
+  const tierIndex = TIERS.findIndex(t => t.name === user?.tier) ?? 0;
+  const tier = TIERS[tierIndex >= 0 ? tierIndex : 0];
+  const nextTier = TIERS[tierIndex + 1];
   const progress = Math.min(((points - tier.min) / (tier.max - tier.min)) * 100, 100);
 
+  const thisMonth = transactions
+    .filter(t => t.type === 'earned' && new Date(t.date).getMonth() === new Date().getMonth())
+    .reduce((s, t) => s + t.points, 0);
+  const lifetime = transactions
+    .filter(t => t.type === 'earned')
+    .reduce((s, t) => s + t.points, 0);
+  const redeemed = Math.abs(
+    transactions
+      .filter(t => t.type === 'spent')
+      .reduce((s, t) => s + t.points, 0)
+  );
+
   return (
-    <div style={{ paddingBottom: 20 }}>
-      <div style={{
-        background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))',
-        padding: '24px 20px 32px', color: '#fff',
-      }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 20 }}>Points & Tier</h1>
+    <div className="pb-6">
+      <div className="px-5 pt-2 pb-4">
+        <h1 className="text-2xl font-bold text-text-main">Points</h1>
+      </div>
 
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'rgba(255,255,255,0.15)', borderRadius: 24,
-            padding: '6px 16px', marginBottom: 12,
-          }}>
-            <Award size={18} color={tier.color} />
-            <span style={{ fontWeight: 600 }}>{tier.name} Member</span>
+      <div className="px-5 mb-5">
+        <div
+          className="rounded-[22px] p-[22px]"
+          style={{ background: 'linear-gradient(135deg, #1A1A1A, #2D2D2D)' }}
+        >
+          <div className="flex flex-col items-center mb-5">
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mb-3"
+              style={{ backgroundColor: `${tier.color}20` }}
+            >
+              <Shield size={28} color={tier.color} />
+            </div>
+            <span
+              className="text-sm font-semibold tracking-wide mb-1"
+              style={{ color: tier.color }}
+            >
+              {tier.name} Member
+            </span>
+            <p className="text-[38px] font-bold text-white leading-none">{points}</p>
+            <p className="text-[11px] tracking-[1.5px] text-white/45 mt-1 uppercase">total points</p>
           </div>
-          <p style={{ fontSize: 48, fontWeight: 700, lineHeight: 1 }}>{points}</p>
-          <p style={{ fontSize: 13, opacity: 0.7, marginTop: 4 }}>total points</p>
-        </div>
 
-        <div style={{ marginBottom: 8 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.7, marginBottom: 6 }}>
-            <span>{tier.name}</span>
-            <span>{tier.max - points} pts to {TIERS[TIERS.indexOf(tier) + 1]?.name || 'max'}</span>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, height: 8, overflow: 'hidden' }}>
-            <div style={{
-              width: `${progress}%`, height: '100%', borderRadius: 8,
-              background: `linear-gradient(90deg, var(--accent), var(--accent-light))`,
-              transition: 'width 0.5s ease',
-            }} />
+          <div className="mb-2">
+            <div className="flex justify-between text-xs text-white/60 mb-2">
+              <span>{tier.name}</span>
+              <span>
+                {nextTier
+                  ? `${tier.max - points + 1} pts to ${nextTier.name}`
+                  : 'Max tier reached'}
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${progress}%`,
+                  background: nextTier
+                    ? `linear-gradient(90deg, ${tier.color}, ${nextTier.color})`
+                    : tier.color,
+                }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] text-white/40 mt-1.5">
+              <span>{tier.min} pts</span>
+              <span>{tier.max} pts</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div style={{ padding: 20 }}>
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24,
-        }}>
-          <div style={{
-            background: 'var(--card)', borderRadius: 16, padding: 16,
-            border: '1px solid var(--border)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <TrendingUp size={18} color="var(--success)" />
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Earned</span>
+      <div className="px-5 mb-5">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-card rounded-2xl p-4 border border-border text-center">
+            <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-blue-500/10">
+              <Calendar size={18} className="text-blue-500" />
             </div>
-            <p style={{ fontSize: 24, fontWeight: 700 }}>
-              {transactions.filter(t => t.type === 'earned').reduce((s, t) => s + t.points, 0)}
-            </p>
+            <p className="text-xs text-text-secondary mb-0.5">This Month</p>
+            <p className="text-xl font-bold text-text-main">{thisMonth}</p>
           </div>
-          <div style={{
-            background: 'var(--card)', borderRadius: 16, padding: 16,
-            border: '1px solid var(--border)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <TrendingDown size={18} color="var(--error)" />
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Spent</span>
+          <div className="bg-card rounded-2xl p-4 border border-border text-center">
+            <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-success/10">
+              <Star size={18} className="text-success" />
             </div>
-            <p style={{ fontSize: 24, fontWeight: 700 }}>
-              {Math.abs(transactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.points, 0))}
-            </p>
+            <p className="text-xs text-text-secondary mb-0.5">Lifetime</p>
+            <p className="text-xl font-bold text-text-main">{lifetime}</p>
+          </div>
+          <div className="bg-card rounded-2xl p-4 border border-border text-center">
+            <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-error/10">
+              <Gift size={18} className="text-error" />
+            </div>
+            <p className="text-xs text-text-secondary mb-0.5">Redeemed</p>
+            <p className="text-xl font-bold text-text-main">{redeemed}</p>
           </div>
         </div>
+      </div>
 
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Transaction History</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {transactions.map(tx => (
-            <div key={tx.id} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              background: 'var(--card)', borderRadius: 12, padding: '12px 16px',
-              border: '1px solid var(--border)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: tx.type === 'earned' ? '#1DB26415' : '#E03E3E15',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  {tx.type === 'earned' ? <TrendingUp size={18} color="var(--success)" /> : <TrendingDown size={18} color="var(--error)" />}
+      <div className="px-5 mb-5">
+        <h2 className="text-base font-semibold text-text-main mb-3">Transaction History</h2>
+        <div className="bg-card rounded-[18px] border border-border overflow-hidden">
+          {transactions.length === 0 ? (
+            <p className="text-sm text-text-secondary text-center py-8">No transactions yet</p>
+          ) : (
+            transactions.map((tx, i) => (
+              <div
+                key={tx.id}
+                className={`flex items-center justify-between px-4 py-3 ${
+                  i < transactions.length - 1 ? 'border-b border-border' : ''
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{
+                      backgroundColor: tx.type === 'earned' ? '#1DB26415' : '#E03E3E15',
+                    }}
+                  >
+                    {tx.type === 'earned' ? (
+                      <TrendingUp size={18} className="text-success" />
+                    ) : (
+                      <TrendingDown size={18} className="text-error" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-text-main">{tx.description}</p>
+                    <p className="text-[11px] text-text-secondary">
+                      {new Date(tx.date).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ fontSize: 14, fontWeight: 500 }}>{tx.description}</p>
-                  <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                    {new Date(tx.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                  </p>
-                </div>
+                <span
+                  className={`text-[15px] font-semibold ${
+                    tx.type === 'earned' ? 'text-success' : 'text-error'
+                  }`}
+                >
+                  {tx.type === 'earned' ? '+' : ''}
+                  {tx.points}
+                </span>
               </div>
-              <span style={{
-                fontSize: 15, fontWeight: 600,
-                color: tx.type === 'earned' ? 'var(--success)' : 'var(--error)',
-              }}>
-                {tx.type === 'earned' ? '+' : ''}{tx.points}
-              </span>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="px-5 pb-4">
+        <h2 className="text-base font-semibold text-text-main mb-3">Tier Levels</h2>
+        <div className="bg-card rounded-[18px] border border-border overflow-hidden">
+          {TIERS.map((t, i) => (
+            <div
+              key={t.name}
+              className={`flex items-center gap-3 px-4 py-3.5 ${
+                i < TIERS.length - 1 ? 'border-b border-border' : ''
+              } ${t.name === tier.name ? 'bg-surface' : ''}`}
+            >
+              <div
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: t.color }}
+              />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-text-main">{t.name}</p>
+                <p className="text-[11px] text-text-secondary">
+                  {t.name === 'Platinum'
+                    ? `${t.min.toLocaleString()}+ points`
+                    : `${t.min.toLocaleString()} - ${t.max.toLocaleString()} points`}
+                </p>
+              </div>
+              {t.name === tier.name && (
+                <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                  Current
+                </span>
+              )}
             </div>
           ))}
         </div>

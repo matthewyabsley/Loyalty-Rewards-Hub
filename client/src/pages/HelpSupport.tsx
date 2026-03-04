@@ -25,29 +25,32 @@ export default function HelpSupport() {
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-        <h1>Help & Support</h1>
+    <div className="flex flex-col min-h-screen bg-background">
+      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
+        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 rounded-full bg-surface">
+          <ArrowLeft size={22} className="text-text-main" />
+        </button>
+        <h1 className="text-xl font-bold text-text-main">Help & Support</h1>
       </div>
 
-      <div style={{ padding: 20 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>FAQ</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+      <div className="p-5">
+        <h2 className="text-base font-semibold text-text-main mb-3">FAQ</h2>
+        <div className="flex flex-col gap-2 mb-6">
           {FAQS.map((faq, i) => (
-            <div key={i} style={{
-              background: 'var(--card)', borderRadius: 14, border: '1px solid var(--border)', overflow: 'hidden',
-            }}>
-              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                width: '100%', padding: '14px 16px', background: 'none', border: 'none',
-                cursor: 'pointer', textAlign: 'left',
-              }}>
-                <span style={{ fontSize: 14, fontWeight: 500, flex: 1, paddingRight: 8 }}>{faq.q}</span>
-                {openFaq === i ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            <div key={i} className="bg-card rounded-[14px] border border-border overflow-hidden">
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="flex justify-between items-center w-full px-4 py-3.5 bg-transparent text-left"
+              >
+                <span className="text-sm font-medium text-text-main flex-1 pr-2">{faq.q}</span>
+                {openFaq === i ? (
+                  <ChevronUp size={18} className="text-text-secondary shrink-0" />
+                ) : (
+                  <ChevronDown size={18} className="text-text-secondary shrink-0" />
+                )}
               </button>
               {openFaq === i && (
-                <div style={{ padding: '0 16px 14px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                <div className="px-4 pb-3.5 text-[13px] text-text-secondary leading-[1.6]">
                   {faq.a}
                 </div>
               )}
@@ -55,43 +58,46 @@ export default function HelpSupport() {
           ))}
         </div>
 
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Contact Us</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+        <h2 className="text-base font-semibold text-text-main mb-3">Contact Us</h2>
+        <div className="flex flex-col gap-2.5 mb-6">
           {[
             { icon: Phone, label: 'Call Us', detail: '01625 000 000' },
             { icon: Mail, label: 'Email', detail: 'hello@tapyard.co.uk' },
           ].map((c, i) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              background: 'var(--card)', borderRadius: 12, padding: 14,
-              border: '1px solid var(--border)',
-            }}>
-              <c.icon size={20} color="var(--primary)" />
+            <div key={i} className="flex items-center gap-3 bg-card rounded-xl p-3.5 border border-border">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <c.icon size={20} className="text-primary" />
+              </div>
               <div>
-                <p style={{ fontSize: 14, fontWeight: 500 }}>{c.label}</p>
-                <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{c.detail}</p>
+                <p className="text-sm font-medium text-text-main">{c.label}</p>
+                <p className="text-xs text-text-secondary">{c.detail}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <button onClick={() => setShowMessage(!showMessage)} className="btn-outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <button
+          onClick={() => setShowMessage(!showMessage)}
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-border text-text-main text-sm font-semibold bg-card transition-transform active:scale-[0.97]"
+        >
           <MessageCircle size={18} /> Send a Message
         </button>
 
         {showMessage && (
-          <div style={{ marginTop: 16 }}>
+          <div className="mt-4">
             <textarea
-              value={message} onChange={e => setMessage(e.target.value)}
+              value={message}
+              onChange={e => setMessage(e.target.value)}
               placeholder="Describe your issue or question..."
-              style={{
-                width: '100%', padding: 14, borderRadius: 12, border: '1px solid var(--border)',
-                fontSize: 14, minHeight: 100, resize: 'vertical', background: 'var(--card)', marginBottom: 12,
-              }}
+              className="w-full p-3.5 rounded-xl border border-border text-sm bg-card text-text-main placeholder:text-text-secondary/50 min-h-[100px] resize-y mb-3"
             />
-            <button onClick={handleSend} className="btn-primary" disabled={!message.trim()}>
+            <button
+              onClick={handleSend}
+              disabled={!message.trim()}
+              className="w-full py-3.5 rounded-xl bg-primary text-white text-sm font-semibold transition-transform active:scale-[0.97] disabled:opacity-50"
+            >
               {sent ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <span className="flex items-center justify-center gap-2">
                   <Check size={18} /> Sent!
                 </span>
               ) : 'Send Message'}

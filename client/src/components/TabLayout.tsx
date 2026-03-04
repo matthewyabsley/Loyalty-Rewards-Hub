@@ -11,30 +11,22 @@ const tabs = [
 
 export default function TabLayout() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ flex: 1, maxWidth: 480, margin: '0 auto', width: '100%' }}>
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="flex-1 w-full max-w-[480px] mx-auto pb-20">
         <Outlet />
       </div>
-      <nav style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#fff', borderTop: '1px solid var(--border)',
-        display: 'flex', justifyContent: 'center', zIndex: 50,
-      }}>
-        <div style={{
-          display: 'flex', maxWidth: 480, width: '100%',
-          justifyContent: 'space-around', padding: '8px 0 20px',
-        }}>
+      <nav className="fixed bottom-0 left-0 right-0 bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.06)] rounded-t-2xl z-50 flex justify-center">
+        <div className="flex w-full max-w-[480px] justify-around pt-2 pb-5">
           {tabs.map(tab => (
             <NavLink
               key={tab.path}
               to={tab.path}
               end={tab.path === '/'}
-              style={({ isActive }) => ({
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                gap: 2, fontSize: 11, fontWeight: 500, padding: '4px 16px',
-                color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                textDecoration: 'none', transition: 'color 0.2s',
-              })}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 text-[11px] font-medium px-4 py-1 transition-colors duration-200 no-underline ${
+                  isActive ? 'text-primary' : 'text-text-secondary'
+                }`
+              }
             >
               <tab.icon size={22} />
               <span>{tab.label}</span>

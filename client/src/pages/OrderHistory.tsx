@@ -35,55 +35,65 @@ export default function OrderHistory() {
   }
 
   const statusColors: Record<string, string> = {
-    completed: 'var(--success)', preparing: 'var(--warning)', delivered: '#3498DB', cancelled: 'var(--error)',
+    completed: '#1DB264',
+    preparing: '#E8A830',
+    delivered: '#3498DB',
+    cancelled: '#E03E3E',
+  };
+
+  const statusBg: Record<string, string> = {
+    completed: 'bg-success/15',
+    preparing: 'bg-warning/15',
+    delivered: 'bg-blue-500/15',
+    cancelled: 'bg-error/15',
   };
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-        <h1>Order History</h1>
+    <div className="flex flex-col min-h-screen bg-background">
+      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
+        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 rounded-full bg-surface">
+          <ArrowLeft size={22} className="text-text-main" />
+        </button>
+        <h1 className="text-xl font-bold text-text-main">Order History</h1>
       </div>
 
       {orders.length === 0 ? (
-        <div className="empty-state">
+        <div className="flex flex-col items-center justify-center flex-1 gap-3 text-text-secondary">
           <ClipboardList size={48} />
-          <p>No orders yet</p>
+          <p className="text-sm">No orders yet</p>
         </div>
       ) : (
-        <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="flex flex-col gap-3 p-5">
           {orders.map(order => (
-            <div key={order.id} style={{
-              background: 'var(--card)', borderRadius: 14, padding: 16,
-              border: '1px solid var(--border)',
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div key={order.id} className="bg-card rounded-[14px] p-4 border border-border">
+              <div className="flex justify-between items-center mb-2.5">
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 600 }}>
+                  <p className="text-sm font-semibold text-text-main">
                     {new Date(order.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
-                  <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Table {order.tableNumber}</p>
+                  <p className="text-xs text-text-secondary">Table {order.tableNumber}</p>
                 </div>
-                <span style={{
-                  fontSize: 11, fontWeight: 600, color: statusColors[order.status],
-                  background: statusColors[order.status] + '15', padding: '3px 10px', borderRadius: 10,
-                  textTransform: 'capitalize',
-                }}>{order.status}</span>
+                <span
+                  className={`text-[11px] font-semibold px-2.5 py-[3px] rounded-[10px] capitalize ${statusBg[order.status]}`}
+                  style={{ color: statusColors[order.status] }}
+                >
+                  {order.status}
+                </span>
               </div>
-              <div style={{ marginBottom: 10 }}>
+              <div className="mb-2.5">
                 {order.items.map((item, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 13 }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>{item.quantity}x {item.name}</span>
-                    <span>£{item.price.toFixed(2)}</span>
+                  <div key={i} className="flex justify-between py-[3px] text-[13px]">
+                    <span className="text-text-secondary">{item.quantity}x {item.name}</span>
+                    <span className="text-text-main">£{item.price.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
-                <span style={{ fontSize: 16, fontWeight: 700 }}>£{order.total.toFixed(2)}</span>
-                <button onClick={() => downloadReceipt(order)} style={{
-                  display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-                  color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer',
-                }}>
+              <div className="flex justify-between items-center border-t border-border pt-2.5">
+                <span className="text-base font-bold text-text-main">£{order.total.toFixed(2)}</span>
+                <button
+                  onClick={() => downloadReceipt(order)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-transparent"
+                >
                   <FileText size={14} /> Receipt
                 </button>
               </div>

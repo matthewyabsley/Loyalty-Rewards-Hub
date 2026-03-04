@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { UtensilsCrossed, Mail, Chrome, Apple, Facebook } from 'lucide-react';
+import { UtensilsCrossed, Mail, Chrome, Apple, Facebook, Gift, CalendarDays, QrCode } from 'lucide-react';
 
 export default function Welcome() {
   const { signIn } = useAuth();
@@ -19,101 +19,98 @@ export default function Welcome() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', padding: 24,
-      background: 'linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%)',
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: 48 }}>
-        <div style={{
-          width: 80, height: 80, borderRadius: 20, background: 'rgba(255,255,255,0.15)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 20px', backdropFilter: 'blur(10px)',
-        }}>
-          <UtensilsCrossed size={36} color="var(--accent)" />
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10"
+      style={{ background: 'linear-gradient(135deg, #6B1420 0%, #8B1A2B 50%, #3D0A14 100%)' }}>
+
+      <div className="text-center mb-12">
+        <div className="w-20 h-20 rounded-3xl bg-accent/15 backdrop-blur-[10px] flex items-center justify-center mx-auto mb-5">
+          <UtensilsCrossed size={36} className="text-accent" />
         </div>
-        <h1 style={{ fontSize: 32, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Tap Yard</h1>
-        <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)' }}>Your loyalty, rewarded</p>
+        <h1 className="text-4xl font-bold text-white mb-2" style={{ fontSize: 36 }}>Tap Yard</h1>
+        <p className="text-[15px] text-white/60">Your loyalty, rewarded</p>
       </div>
 
-      <div style={{ width: '100%', maxWidth: 360 }}>
+      <div className="flex flex-col gap-5 mb-10 w-full max-w-[360px]">
+        {[
+          { icon: <Gift size={20} className="text-accent" />, text: 'Earn rewards with every visit' },
+          { icon: <CalendarDays size={20} className="text-accent" />, text: 'Book tables in seconds' },
+          { icon: <QrCode size={20} className="text-accent" />, text: 'Scan & redeem instantly' },
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-3">
+            {item.icon}
+            <span className="text-white/85 text-[15px]">{item.text}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="w-full max-w-[360px]">
         {!showEmail ? (
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-              {[
-                { provider: 'google', label: 'Continue with Google', icon: <Chrome size={20} />, bg: '#fff', color: '#333' },
-                { provider: 'apple', label: 'Continue with Apple', icon: <Apple size={20} />, bg: '#000', color: '#fff' },
-                { provider: 'facebook', label: 'Continue with Facebook', icon: <Facebook size={20} />, bg: '#1877F2', color: '#fff' },
-              ].map(s => (
-                <button key={s.provider} onClick={() => handleSocial(s.provider)} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  padding: '14px 20px', borderRadius: 12, fontSize: 15, fontWeight: 600,
-                  background: s.bg, color: s.color, border: 'none', cursor: 'pointer',
-                  transition: 'transform 0.1s', width: '100%',
-                }}>
-                  {s.icon} {s.label}
-                </button>
-              ))}
+            <div className="flex flex-col gap-3 mb-6">
+              <button
+                onClick={() => handleSocial('google')}
+                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-white text-gray-800 active:scale-[0.98] transition-transform"
+              >
+                <Chrome size={20} /> Continue with Google
+              </button>
+              <button
+                onClick={() => handleSocial('apple')}
+                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-[#1A1A1A] text-white active:scale-[0.98] transition-transform"
+              >
+                <Apple size={20} /> Continue with Apple
+              </button>
+              <button
+                onClick={() => handleSocial('facebook')}
+                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-[#1877F2] text-white active:scale-[0.98] transition-transform"
+              >
+                <Facebook size={20} /> Continue with Facebook
+              </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.25)' }} />
-              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>or</span>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.25)' }} />
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex-1 h-px bg-white/25" />
+              <span className="text-white/60 text-[13px]">or sign up with email</span>
+              <div className="flex-1 h-px bg-white/25" />
             </div>
 
-            <button onClick={() => setShowEmail(true)} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              padding: '14px 20px', borderRadius: 12, fontSize: 15, fontWeight: 600,
-              background: 'transparent', color: '#fff', border: '2px solid rgba(255,255,255,0.3)',
-              cursor: 'pointer', width: '100%',
-            }}>
+            <button
+              onClick={() => setShowEmail(true)}
+              className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl text-[15px] font-semibold bg-transparent text-white border-2 border-white/30 active:scale-[0.98] transition-transform"
+            >
               <Mail size={20} /> Sign up with Email
             </button>
           </>
         ) : (
-          <form onSubmit={handleEmail} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <form onSubmit={handleEmail} className="flex flex-col gap-3">
             <input
-              type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)}
-              style={{
-                padding: '14px 16px', borderRadius: 12, border: 'none', fontSize: 15,
-                background: 'rgba(255,255,255,0.15)', color: '#fff', backdropFilter: 'blur(10px)',
-              }}
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="py-3.5 px-4 rounded-xl border-none text-[15px] bg-white/10 text-white backdrop-blur-[10px] placeholder:text-white/40"
             />
             <input
-              type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)}
-              style={{
-                padding: '14px 16px', borderRadius: 12, border: 'none', fontSize: 15,
-                background: 'rgba(255,255,255,0.15)', color: '#fff', backdropFilter: 'blur(10px)',
-              }}
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="py-3.5 px-4 rounded-xl border-none text-[15px] bg-white/10 text-white backdrop-blur-[10px] placeholder:text-white/40"
             />
-            <button type="submit" style={{
-              padding: '14px 20px', borderRadius: 12, fontSize: 15, fontWeight: 600,
-              background: 'var(--accent)', color: '#fff', border: 'none', cursor: 'pointer',
-              marginTop: 4,
-            }}>
-              Create Account
+            <button
+              type="submit"
+              className="py-3.5 px-5 rounded-xl text-[15px] font-semibold bg-accent text-white mt-1 active:scale-[0.98] transition-transform"
+            >
+              Get Started
             </button>
-            <button type="button" onClick={() => setShowEmail(false)} style={{
-              padding: '12px', background: 'transparent', color: 'rgba(255,255,255,0.7)',
-              border: 'none', cursor: 'pointer', fontSize: 14,
-            }}>
+            <button
+              type="button"
+              onClick={() => setShowEmail(false)}
+              className="py-3 bg-transparent text-white/70 text-sm"
+            >
               Back to sign in options
             </button>
           </form>
         )}
-      </div>
-
-      <div style={{ marginTop: 40, display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
-        {['Book Tables', 'Order Food', 'Earn Rewards', 'Local Events'].map(f => (
-          <div key={f} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 500,
-          }}>
-            <div style={{ width: 4, height: 4, borderRadius: 2, background: 'var(--accent)' }} />
-            {f}
-          </div>
-        ))}
       </div>
     </div>
   );

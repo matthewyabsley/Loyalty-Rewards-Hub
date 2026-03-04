@@ -13,50 +13,53 @@ export default function Notifications() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-        <h1>Notifications</h1>
+    <div className="flex flex-col min-h-screen bg-background">
+      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
+        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 rounded-full bg-surface">
+          <ArrowLeft size={22} className="text-text-main" />
+        </button>
+        <h1 className="text-xl font-bold text-text-main flex-1">Notifications</h1>
         {unreadCount > 0 && (
-          <button onClick={markAllNotificationsRead} style={{
-            display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600,
-            color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer',
-          }}>
+          <button
+            onClick={markAllNotificationsRead}
+            className="flex items-center gap-1 text-xs font-semibold text-primary bg-transparent"
+          >
             <CheckCheck size={16} /> Mark all read
           </button>
         )}
       </div>
 
       {notifications.length === 0 ? (
-        <div className="empty-state">
+        <div className="flex flex-col items-center justify-center flex-1 gap-3 text-text-secondary">
           <Bell size={48} />
-          <p>No notifications</p>
+          <p className="text-sm">No notifications</p>
         </div>
       ) : (
-        <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="flex flex-col gap-2 p-5">
           {notifications.map(notif => {
             const Icon = TYPE_ICONS[notif.type] || Bell;
             return (
-              <button key={notif.id} onClick={() => markNotificationRead(notif.id)} style={{
-                display: 'flex', gap: 12, padding: 14, borderRadius: 14,
-                background: notif.read ? 'var(--card)' : 'var(--primary)' + '08',
-                border: `1px solid ${notif.read ? 'var(--border)' : 'var(--primary)' + '20'}`,
-                cursor: 'pointer', textAlign: 'left', width: '100%',
-              }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                  background: notif.read ? 'var(--surface)' : 'var(--primary)' + '15',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Icon size={18} color={notif.read ? 'var(--text-secondary)' : 'var(--primary)'} />
+              <button
+                key={notif.id}
+                onClick={() => markNotificationRead(notif.id)}
+                className={`flex gap-3 p-3.5 rounded-[14px] w-full text-left transition-colors ${
+                  notif.read
+                    ? 'bg-card border border-border'
+                    : 'bg-primary/[0.08] border border-primary/20'
+                }`}
+              >
+                <div className={`w-9 h-9 rounded-[10px] shrink-0 flex items-center justify-center ${
+                  notif.read ? 'bg-surface' : 'bg-primary/15'
+                }`}>
+                  <Icon size={18} className={notif.read ? 'text-text-secondary' : 'text-primary'} />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                    <h3 style={{ fontSize: 13, fontWeight: notif.read ? 500 : 600 }}>{notif.title}</h3>
-                    {!notif.read && <div style={{ width: 8, height: 8, borderRadius: 4, background: 'var(--primary)' }} />}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center mb-0.5">
+                    <h3 className={`text-[13px] ${notif.read ? 'font-medium' : 'font-semibold'} text-text-main`}>{notif.title}</h3>
+                    {!notif.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0 ml-2" />}
                   </div>
-                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4 }}>{notif.message}</p>
-                  <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, opacity: 0.7 }}>
+                  <p className="text-xs text-text-secondary leading-[1.4]">{notif.message}</p>
+                  <p className="text-[11px] text-text-secondary/70 mt-1">
                     {new Date(notif.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>

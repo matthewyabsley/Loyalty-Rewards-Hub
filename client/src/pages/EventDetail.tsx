@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
-import { ArrowLeft, Calendar, Clock, Users, MapPin, Check } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Users, Check } from 'lucide-react';
 
 export default function EventDetail() {
   const navigate = useNavigate();
@@ -12,12 +12,19 @@ export default function EventDetail() {
   const event = events.find(e => e.id === id);
   if (!event) {
     return (
-      <div className="page">
-        <div className="page-header">
-          <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-          <h1>Event</h1>
+      <div className="flex flex-col min-h-screen bg-background max-w-[480px] mx-auto w-full">
+        <div className="flex items-center gap-3 px-5 pt-[67px] pb-3 bg-card border-b border-border">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-surface text-text-main"
+          >
+            <ArrowLeft size={22} />
+          </button>
+          <h1 className="text-xl font-bold text-text-main">Event</h1>
         </div>
-        <div className="empty-state"><p>Event not found</p></div>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-text-secondary text-sm">Event not found</p>
+        </div>
       </div>
     );
   }
@@ -29,71 +36,84 @@ export default function EventDetail() {
 
   if (booked) {
     return (
-      <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center' }}>
-        <div style={{ width: 64, height: 64, borderRadius: 32, background: '#1DB26415', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <Check size={32} color="var(--success)" />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background max-w-[480px] mx-auto w-full px-10 text-center">
+        <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-5">
+          <Check size={32} className="text-success" />
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Event Booked!</h2>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>{event.title}</p>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>
+        <h2 className="text-[22px] font-bold text-text-main mb-2">Event Booked!</h2>
+        <p className="text-sm text-text-secondary mb-1">{event.title}</p>
+        <p className="text-[13px] text-text-secondary mb-6">
           {new Date(event.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} at {event.time}
         </p>
-        <button onClick={() => navigate('/')} className="btn-primary" style={{ maxWidth: 280 }}>Back to Home</button>
+        <button
+          onClick={() => navigate('/')}
+          className="w-full max-w-[280px] py-4 rounded-2xl font-semibold text-white text-[15px] transition-transform active:scale-[0.97]"
+          style={{ background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' }}
+        >
+          Back to Home
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-        <h1>Event Details</h1>
+    <div className="flex flex-col min-h-screen bg-background max-w-[480px] mx-auto w-full">
+      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3 bg-card border-b border-border">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-surface text-text-main"
+        >
+          <ArrowLeft size={22} />
+        </button>
+        <h1 className="text-xl font-bold text-text-main">Event Details</h1>
       </div>
 
-      <div style={{ padding: 20 }}>
-        <div style={{
-          background: `linear-gradient(135deg, var(--primary-dark), var(--primary))`,
-          borderRadius: 20, padding: 24, color: '#fff', marginBottom: 20,
-        }}>
-          <span style={{
-            fontSize: 11, fontWeight: 600, background: 'rgba(255,255,255,0.2)',
-            padding: '4px 10px', borderRadius: 10,
-          }}>{event.category}</span>
-          <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 12, marginBottom: 8 }}>{event.title}</h2>
-          <p style={{ fontSize: 28, fontWeight: 700 }}>£{event.price}</p>
+      <div className="p-5">
+        <div
+          className="rounded-[20px] p-6 text-white mb-5"
+          style={{ background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' }}
+        >
+          <span className="text-[11px] font-semibold bg-white/20 px-2.5 py-1 rounded-[10px]">
+            {event.category}
+          </span>
+          <h2 className="text-[22px] font-bold mt-3 mb-2">{event.title}</h2>
+          <p className="text-[28px] font-bold">£{event.price}</p>
         </div>
 
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>{event.description}</p>
+        <p className="text-sm text-text-secondary leading-[1.7] mb-5">{event.description}</p>
 
-        <div style={{
-          background: 'var(--card)', borderRadius: 14, padding: 16,
-          border: '1px solid var(--border)', marginBottom: 24,
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Calendar size={18} color="var(--primary)" />
+        <div className="bg-card rounded-[14px] p-4 border border-border mb-6 grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-2.5">
+            <Calendar size={18} className="text-primary" />
             <div>
-              <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Date</p>
-              <p style={{ fontSize: 13, fontWeight: 600 }}>{new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+              <p className="text-[11px] text-text-secondary">Date</p>
+              <p className="text-[13px] font-semibold text-text-main">
+                {new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Clock size={18} color="var(--primary)" />
+          <div className="flex items-center gap-2.5">
+            <Clock size={18} className="text-primary" />
             <div>
-              <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Time</p>
-              <p style={{ fontSize: 13, fontWeight: 600 }}>{event.time}</p>
+              <p className="text-[11px] text-text-secondary">Time</p>
+              <p className="text-[13px] font-semibold text-text-main">{event.time}</p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Users size={18} color="var(--primary)" />
+          <div className="flex items-center gap-2.5">
+            <Users size={18} className="text-primary" />
             <div>
-              <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Spots Left</p>
-              <p style={{ fontSize: 13, fontWeight: 600 }}>{event.spotsLeft}</p>
+              <p className="text-[11px] text-text-secondary">Spots Left</p>
+              <p className="text-[13px] font-semibold text-text-main">{event.spotsLeft}</p>
             </div>
           </div>
         </div>
 
-        <button onClick={handleBook} disabled={event.spotsLeft === 0} className="btn-primary">
+        <button
+          onClick={handleBook}
+          disabled={event.spotsLeft === 0}
+          className="w-full py-4 rounded-2xl font-semibold text-white text-[15px] transition-transform active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ background: 'linear-gradient(135deg, #6B1420, #8B1A2B)' }}
+        >
           {event.spotsLeft === 0 ? 'Sold Out' : `Book Now · £${event.price}`}
         </button>
       </div>

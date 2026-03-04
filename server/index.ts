@@ -103,8 +103,8 @@ function serveStaticApp(app: express.Application) {
   if (fs.existsSync(distPath)) {
     log("Serving static web app from dist/");
     app.use(express.static(distPath));
-    app.get("*", (req: Request, res: Response, next: NextFunction) => {
-      if (req.path.startsWith("/api")) return next();
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.method !== "GET" || req.path.startsWith("/api")) return next();
       res.sendFile(path.resolve(distPath, "index.html"));
     });
   } else {

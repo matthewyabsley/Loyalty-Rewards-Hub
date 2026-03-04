@@ -26,34 +26,44 @@ export default function TermsPrivacy() {
   const sections = tab === 'terms' ? TERMS : PRIVACY;
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-        <h1>Terms & Privacy</h1>
+    <div className="flex flex-col min-h-screen bg-background">
+      <div className="flex items-center gap-3 px-5 pt-[67px] pb-3">
+        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 rounded-full bg-surface">
+          <ArrowLeft size={22} className="text-text-main" />
+        </button>
+        <h1 className="text-xl font-bold text-text-main">Terms & Privacy</h1>
       </div>
 
-      <div style={{ display: 'flex', padding: '0 20px', gap: 8, marginTop: 4 }}>
-        <button onClick={() => setTab('terms')} style={{
-          flex: 1, padding: '10px', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          background: tab === 'terms' ? 'var(--primary)' : 'var(--card)',
-          color: tab === 'terms' ? '#fff' : 'var(--text)',
-          border: tab === 'terms' ? 'none' : '1px solid var(--border)',
-        }}>Terms of Service</button>
-        <button onClick={() => setTab('privacy')} style={{
-          flex: 1, padding: '10px', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          background: tab === 'privacy' ? 'var(--primary)' : 'var(--card)',
-          color: tab === 'privacy' ? '#fff' : 'var(--text)',
-          border: tab === 'privacy' ? 'none' : '1px solid var(--border)',
-        }}>Privacy Policy</button>
+      <div className="flex gap-2 px-5 mt-1">
+        <button
+          onClick={() => setTab('terms')}
+          className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-colors ${
+            tab === 'terms'
+              ? 'bg-primary text-white'
+              : 'bg-card text-text-main border border-border'
+          }`}
+        >
+          Terms of Service
+        </button>
+        <button
+          onClick={() => setTab('privacy')}
+          className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-colors ${
+            tab === 'privacy'
+              ? 'bg-primary text-white'
+              : 'bg-card text-text-main border border-border'
+          }`}
+        >
+          Privacy Policy
+        </button>
       </div>
 
-      <div style={{ padding: 20 }}>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Last updated: February 2026</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="p-5">
+        <p className="text-xs text-text-secondary mb-4">Last updated: February 2026</p>
+        <div className="flex flex-col gap-4">
           {sections.map((s, i) => (
             <div key={i}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>{s.title}</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.content}</p>
+              <h3 className="text-sm font-semibold text-text-main mb-1.5">{s.title}</h3>
+              <p className="text-[13px] text-text-secondary leading-[1.6]">{s.content}</p>
             </div>
           ))}
         </div>
